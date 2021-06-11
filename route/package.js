@@ -100,7 +100,7 @@ router.get("/specific", (req, res) => {
       if (err) return res.json({ success: false, error: err });
       else return res.json({ success: true, messages: data.length, data });
     }
-  );
+  ).sort({'price' :1 , 'calltime' :1, 'internet_speed':1})
 });
 
 module.exports = router;
