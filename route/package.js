@@ -6,17 +6,12 @@ router.get("/", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
-      // const PostPaid = new Package([]);
-      // Package.find({},(err, result) => {
-      //   if(err) return res.json({ success: false, error: err })
-      //   return res.json({result})
-      // })
-      return res.json({ success: true, message: data.length, PostPaid });
+      return res.json({ success: true, message: data.length, data });
     }
   });
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const {
     package_type,
     name,
@@ -47,13 +42,13 @@ router.post("/", (req, res) => {
   data.moreDetials.description = moreDetials.description;
   data.moreDetials.wifi = moreDetials.wifi;
   data.moreDetials.morebenefit = moreDetials.morebenefit;
-  data.save((err) => {
+  await data.save((err) => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });
   });
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   const {
     package_type,
     name,
@@ -64,8 +59,9 @@ router.put("/:id", (req, res) => {
     moreDetials,
   } = req.body;
 
-  Package.findByIdAndUpdate(
-    req.params.id,
+  const {id} = req.params;
+  const update = await Package.findByIdAndUpdate(
+   id,
     {
       package_type,
       name,
@@ -77,13 +73,22 @@ router.put("/:id", (req, res) => {
     },
     (err) => {
       if (err) return res.json({ success: false, error: err });
-      return res.json({ success: true });
     }
   );
+  return res.json({ success: true, update });
 });
 
-//ดักแยกเคส รายเดือน ทุกอัน กับเติมเงิน
-router.get("/specific", (req, res) => {
+router.delete("/:id", async (req, res) => {
+  const {id} = req.params;
+  await Package.findByIdAndDelete(id, (err, data) => {
+    if (err) return res.json({ success: false, error });
+    else if (data === undefined || data === null)
+      return res.json({ success: false, message: "There is any package"});
+      else return res.json({ success: true });
+  });
+});
+
+router.get("/specific", async (req, res) => {
   const {
     package_type,
     internet_type,
@@ -94,7 +99,7 @@ router.get("/specific", (req, res) => {
     internet_speed,
   } = req.body;
 
-  Package.find(
+  await Package.find(
     {
       package_type: package_type,
       internet_type: internet_type,
