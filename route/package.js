@@ -3,9 +3,16 @@ const router = express.Router();
 const Package = require("../model/Package_model");
 
 router.get("/", (req, res) => {
-  Package.find({},{_id:0},(err, data) => {
+  Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true, message: data.length, data });
+    else {
+      const PostPaid = new Package([]);
+      Package.find({},(err, result) => {
+        if(err) return res.json({ success: false, error: err })
+        return res.json({result})
+      })
+      // return res.json({ success: true, message: data.length, PostPaid });
+    }
   });
 });
 
@@ -75,7 +82,7 @@ router.put("/:id", (req, res) => {
   );
 });
 
-//ดักแยกเคส รายเดือน ทุกอัน กับเติมเงิน 
+//ดักแยกเคส รายเดือน ทุกอัน กับเติมเงิน
 router.get("/specific", (req, res) => {
   const {
     package_type,
@@ -100,7 +107,7 @@ router.get("/specific", (req, res) => {
       if (err) return res.json({ success: false, error: err });
       else return res.json({ success: true, messages: data.length, data });
     }
-  ).sort({'price' :1 , 'calltime' :1, 'internet_speed':1})
+  ).sort({ price: 1, calltime: 1, internet_speed: 1 });
 });
 
 module.exports = router;
