@@ -6,12 +6,12 @@ router.get("/", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
-      const PostPaid = new Package([]);
-      Package.find({},(err, result) => {
-        if(err) return res.json({ success: false, error: err })
-        return res.json({result})
-      })
-      // return res.json({ success: true, message: data.length, PostPaid });
+      // const PostPaid = new Package([]);
+      // Package.find({},(err, result) => {
+      //   if(err) return res.json({ success: false, error: err })
+      //   return res.json({result})
+      // })
+      return res.json({ success: true, message: data.length, PostPaid });
     }
   });
 });

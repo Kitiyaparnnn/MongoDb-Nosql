@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //Connect to database
 const db =
   "mongodb+srv://me123:me123@cluster0.xhvfg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MOGODB_URI || db, { useNewUrlParser: true, useUnifiedTopology: true });
 
 mongoose.connection.on(
   "error",
