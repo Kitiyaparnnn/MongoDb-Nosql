@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -14,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const db =
   "mongodb+srv://me123:me123@cluster0.xhvfg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 mongoose.connect(process.env.MOGODB_URI || db, { useNewUrlParser: true, useUnifiedTopology: true });
-
+// mongoose.connect(process.env.MOGODB_URI || 'mongodb://localhost/FIRST PROJECT')
 mongoose.connection.on(
   "error",
   console.error.bind(console, "connection error: ")
