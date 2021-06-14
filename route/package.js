@@ -90,22 +90,22 @@ router.delete("/:id", async (req, res) => {
 
 router.get("/bestlist", async (req, res) => {
   const {
-    package_type,
-    internet_type,
-    pricemin,
-    pricemax,
-    calltimemin,
-    calltimemax,
-    internet_speed,
+    packageType,
+    internetType,
+    minprice,
+    maxprice,
+    minCall,
+    maxCall,
+    internetSpeed,
   } = req.body;
 
   await Package.find(
     {
-      package_type: package_type,
-      internet_type: internet_type,
-      price: { $gte: pricemin, $lte: pricemax },
-      calltime: { $gte: calltimemin, $lte: calltimemax },
-      internet_speed: { $gte: internet_speed },
+      package_type: packageType,
+      internet_type: internetType,
+      price: { $gte: minprice, $lte: maxprice },
+      calltime: { $gte: minCall, $lte: maxCall },
+      internet_speed: { $gte: internetSpeed },
     },
     { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
     (err, data) => {
@@ -117,7 +117,7 @@ router.get("/bestlist", async (req, res) => {
 });
 
 router.get("/ranges",(req, res) => {
-  return res.json({pricemin: 49,pricemax:2000,calltimemin:0,calltimemax:800,internet_speed_min:0.5,internet_speed_max:100})
+  return res.json({minprice: 49,maxprice:2000,minCall:0,maxCall:800,minInternetSpeed:0.5,maxInternetSpeed:100})
 })
 
 module.exports = router;
