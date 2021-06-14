@@ -88,7 +88,7 @@ router.delete("/:id", async (req, res) => {
   });
 });
 
-router.get("/specific", async (req, res) => {
+router.get("/bestlist", async (req, res) => {
   const {
     package_type,
     internet_type,
@@ -109,10 +109,15 @@ router.get("/specific", async (req, res) => {
     },
     { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
     (err, data) => {
-      if (err) return res.json({ success: false, error: err });
+      if (err) return res.json({ success: false,message: 'Please select all package option', error: err });
       else return res.json({ success: true, messages: data.length, data });
     }
-  ).sort({ price: 1, calltime: 1, internet_speed: 1 });
+  ).sort({ price: 1, calltime: 1, internet_speed: 1 }).limit(3);
+
 });
+
+router.get("/ranges",(req, res) => {
+  return res.json({pricemin: 49,pricemax:2000,calltimemin:0,calltimemax:800,internet_speed_min:0.5,internet_speed_max:100})
+})
 
 module.exports = router;

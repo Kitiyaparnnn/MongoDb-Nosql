@@ -8,7 +8,8 @@ const UserData = mongoose.Schema({
     houseNo: { type: String, required: true },
     subdistrict: { type: String, required: true },
     district: { type: String, required: true },
-    postId: { type: String, required: true },
+    province: { type: String, required: true },
+    zipcode: { type: Number, required: true },
   },
   mobile: { type: Number, required: [true, "What is your contact number?"] },
   email: { type: String, required: true },
@@ -21,7 +22,7 @@ const UserData = mongoose.Schema({
     {
       user_idcard: { type: Buffer, required: true },
       idcard: { type: Buffer, required: true },
-      studentcard: Buffer
+      studentcard: Buffer,
     },
   ],
 });

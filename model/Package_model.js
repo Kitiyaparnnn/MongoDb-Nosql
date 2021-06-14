@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const PackagesData = mongoose.Schema({
-    package_type: {type: String, required:true},
+    package_type: {type: String, required:true,default: 'Post Paid'},
     name: String,
     internet_type: {type: String, required:true},
     price: {type: Number, required:true},

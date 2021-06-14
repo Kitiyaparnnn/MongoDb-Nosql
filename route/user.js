@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
 
 var upload = multer({ storage: storage });
 
+//Get all users
 router.get("/", async (req, res) => {
   await User.find((err, data) => {
     if (err) return res.json({ success: false, error: err });
@@ -32,7 +33,7 @@ router.get("/:id", async (req, res) => {
   });
 });
 
-router.post("/", upload.array("image"),async (req, res) => {
+router.post("/", upload.array("image"), async (req, res) => {
   const { name, date, Idcard, address, mobile, email, school, photo } =
     req.body;
 
@@ -44,23 +45,26 @@ router.post("/", upload.array("image"),async (req, res) => {
     mobile,
     email,
     school,
-    photo :{
-        user_idcard: fs.readFileSync(
-      path.join(__dirname + "/uploads/" + req.file.filename)),
-      idcard:fs.readFileSync(
+    photo: {
+      user_idcard: fs.readFileSync(
         path.join(__dirname + "/uploads/" + req.file.filename)
-    ),
-    studentcard:fs.readFileSync(
-        path.join(__dirname + "/uploads/" + req.file.filename))
-    } 
-  }
-await User.create(newuser,(err, data) => {
-    if(err) return res.json({ success: false, error: err });
-    else{
-        return res.json({ success: true,data})
+      ),
+      idcard: fs.readFileSync(
+        path.join(__dirname + "/uploads/" + req.file.filename)
+      ),
+      studentcard: fs.readFileSync(
+        path.join(__dirname + "/uploads/" + req.file.filename)
+      ),
+    },
+  };
+  await User.create(newuser, (err, data) => {
+    if (err) return res.json({ success: false, error: err });
+    else {
+      return res.json({ success: true, data });
     }
-})
-
+  });
 });
+
+
 
 module.exports = router;
