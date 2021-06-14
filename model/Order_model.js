@@ -3,11 +3,11 @@ const UserData = require("./User_model");
 const PackagesData = require("./Package_model");
 
 //array shopping 
-const OrdersData = mongoose.Schema({
+const OrdersSchema = mongoose.Schema({
   
       user: UserData,
       package: [PackagesData],
 
 });
 
-module.exports = mongoose.model("Order", OrderData);
+module.exports = mongoose.model("Order", OrdersSchema);

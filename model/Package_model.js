@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const PackagesData = mongoose.Schema({
+const PackageSchema = mongoose.Schema({
     package_type: {type: String, required:true,default: 'Post Paid'},
     name: String,
     internet_type: {type: String, required:true},
@@ -26,4 +26,4 @@ const PackagesData = mongoose.Schema({
 
 
 
-module.exports = mongoose.model('Package',PackagesData)
+module.exports = mongoose.model('Package',PackageSchema)

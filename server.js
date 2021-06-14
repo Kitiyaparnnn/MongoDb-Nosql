@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
+const jsonwebtoken = require("jsonwebtoken");
 const packageRoute = require("./route/package");
-const userRote = require("./route/user")
+const userRoute = require("./route/user")
+const adminRoute = require("./route/admin")
 
 const app = express();
 
@@ -25,16 +27,34 @@ mongoose.connection.once("open", function () {
 
 //First page
 app.get("/",(req, res) => {
-  return res.send('hello')
+  return res.send('hello khemdev')
 })
 
-//Controll Package
+//Package Part
 app.use("/package", packageRoute);
 
-//Collect Users
-app.use("/user",userRote);
+//User Part
+app.use("/user",userRoute);
 
+//Admin Part
+app.use(function(req, res, next) {
+  if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'JWT') {
+    jsonwebtoken.verify(req.headers.authorization.split(' ')[1], 'RESTFULAPIs', function(err, decode) {
+      if (err) req.user = undefined;
+      req.user = decode;
+      next();
+    });
+  } else {
+    req.user = undefined;
+    next();
+  }
+});
 
+adminRoute(app)
+
+app.use(function(req, res) {
+  res.status(404).send({ url: req.originalUrl + ' not found' })
+});
 
 //View engines
 // app.set("view engine", "ejs");
