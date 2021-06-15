@@ -1,51 +1,131 @@
-'use strict';
+const mongoose = require("mongoose"),
+  jwt = require("jsonwebtoken"),
+  bcrypt = require("bcrypt"),
+  Admin = require("../model/Admin_model");
 
-const mongoose = require('mongoose'),
-  jwt = require('jsonwebtoken'),
-  bcrypt = require('bcrypt'),
-  Admin = require('../model/Admin_model')
+exports.register = (req, res) => {
+  if (req.body.password.length < 8)
+    return res.json({
+      success: false,
+      message: "Password must be 8 characters",
+    });
 
-exports.register = function(req, res) {
   const newAdmin = new Admin(req.body);
   newAdmin.hash_password = bcrypt.hashSync(req.body.password, 10);
-  newAdmin.save(function(err, Admin) {
+  newAdmin.save((err, admin) => {
     if (err) {
       return res.status(400).send({
-        message: err
+        success: false,
+        message: "Email already exists",
       });
     } else {
-      Admin.hash_password = undefined;
-      return res.json(Admin);
+      admin.hash_password = undefined;
+      return res.json(admin);
     }
   });
 };
 
-exports.sign_in = function(req, res) {
-  Admin.findOne({
-    email: req.body.email
-  }, function(err, Admin) {
-    if (err) throw err;
-    if (!Admin || !Admin.comparePassword(req.body.password)) {
-      return res.status(401).json({ message: 'Authentication failed. Invalid Admin or password.' });
+exports.login = (req, res) => {
+  Admin.findOne(
+    {
+      email: req.body.email,
+    },
+    (err, admin) => {
+      if (err) throw err;
+      if (!admin || !admin.comparePassword(req.body.password)) {
+        return res.status(401).json({
+          message: "Authentication failed. Invalid Admin or password.",
+        });
+      }
+
+      return res.json({
+        token: jwt.sign(
+          { email: admin.email, fullName: admin.fullName, _id: admin._id },
+          "RESTFULAPIs"
+        ),
+      });
     }
-    return res.json({ token: jwt.sign({ email: Admin.email, fullName: Admin.fullName, _id: Admin._id }, 'RESTFULAPIs') });
-  });
+  );
 };
 
-exports.loginRequired = function(req, res, next) {
+exports.loginRequired = (req, res, next) => {
   if (req.Admin) {
     next();
   } else {
-
-    return res.status(401).json({ message: 'Unauthorized Admin!!' });
+    return res.status(401).json({ message: "Unauthorized Admin!!" });
   }
 };
-exports.profile = function(req, res, next) {
+
+exports.profile = (req, res) => {
   if (req.Admin) {
-    res.send(req.Admin);
-    next();
-  } 
-  else {
-   return res.status(401).json({ message: 'Invalid token' });
+    return res.send(req.Admin);
+  } else {
+    return res.status(401).json({ message: "Invalid token" });
   }
+};
+
+exports.dashboard = (req, res) => {
+  Admin.find(
+    {},
+    { fullName: 1, email: 1, _id: 0, hash_password: 1 },
+    (err, data) => {
+      res.json({
+        success: true,
+        data: {
+          title: "Admin Dashboard",
+          admins: data,
+        },
+      });
+    }
+  );
+};
+
+exports.forgotPassword = (req, res) => {
+  if (req.body.newpassword.length < 8) {
+    return res.json({
+      success: false,
+      message: "Password must be 8 characters",
+    });
+  }
+
+  Admin.findOne(
+    {
+      email: req.body.email,
+    },
+    (err, admin) => {
+      if (err) throw err;
+      if (!admin) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication failed. Invalid Admin.",
+        });
+      }
+      if (admin.comparePassword(req.body.newpassword)) {
+        return res.json({
+          success: false,
+          message: "Newpassword is same as password",
+        });
+      }
+      admin.hash_password = bcrypt.hashSync(req.body.newpassword, 10);
+      admin.save();
+      return res.json({
+        success: true,
+        message: "Password changed",
+      });
+    }
+  );
+};
+
+exports.delete = (req, res) => {
+  //comfirm password for delete admin acount
+
+  Admin.findOne({ email: req.body.email }, (err, admin) => {
+    if (err) return res.json({ success: false, error: err });
+    if (admin.comparePassword(req.body.confirmPassword)) {
+      Admin.findOneAndDelete({ email: req.body.email }, (err, admin) => {
+        if (err) return res.json({ success: false, error: err });
+        return res.json({ success: true, message: "Admin is deleted" });
+      });
+    }
+  });
 };
