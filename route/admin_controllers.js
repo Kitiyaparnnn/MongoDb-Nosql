@@ -1,6 +1,6 @@
 const mongoose = require("mongoose"),
   jwt = require("jsonwebtoken"),
-  bcrypt = require("bcrypt"),
+  bcrypt = require("bcryptjs"),
   Admin = require("../model/Admin_model");
 
 exports.register = (req, res) => {
