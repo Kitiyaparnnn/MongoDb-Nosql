@@ -1,18 +1,18 @@
-const mongoose = require("mongoose"),
-  jwt = require("jsonwebtoken"),
-  bcrypt = require("bcryptjs"),
-  Admin = require("../model/Admin_model");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const Admin = require("../model/Admin_model");
+const SECRET_KEY = 'RESTFULAPIs'
 
-exports.register = (req, res) => {
+exports.register = async (req, res) => {
   if (req.body.password.length < 8)
     return res.json({
       success: false,
-      message: "Password must be 8 characters",
+      message: "Password must be more than 8 characters",
     });
 
   const newAdmin = new Admin(req.body);
   newAdmin.hash_password = bcrypt.hashSync(req.body.password, 10);
-  newAdmin.save((err, admin) => {
+  await newAdmin.save((err, admin) => {
     if (err) {
       return res.status(400).send({
         success: false,
@@ -20,13 +20,13 @@ exports.register = (req, res) => {
       });
     } else {
       admin.hash_password = undefined;
-      return res.json(admin);
+      return res.json({ message: "Register success", admin });
     }
   });
 };
 
-exports.login = (req, res) => {
-  Admin.findOne(
+exports.login = async (req, res) => {
+  await Admin.findOne(
     {
       email: req.body.email,
     },
@@ -39,9 +39,10 @@ exports.login = (req, res) => {
       }
 
       return res.json({
+        message: "Login success",
         token: jwt.sign(
           { email: admin.email, fullName: admin.fullName, _id: admin._id },
-          "RESTFULAPIs"
+          SECRET_KEY
         ),
       });
     }
@@ -49,23 +50,30 @@ exports.login = (req, res) => {
 };
 
 exports.loginRequired = (req, res, next) => {
-  if (req.Admin) {
-    next();
+  if (req.headers && req.headers.authorization) {
+    jwt.verify(req.headers.authorization, SECRET_KEY, (err, decode) => {
+      if (err) req.Admin = undefined;
+      req.Admin = decode;
+      next();
+    });
   } else {
-    return res.status(401).json({ message: "Unauthorized Admin!!" });
+    req.Admin = undefined;
+    next();
   }
 };
 
-exports.profile = (req, res) => {
+exports.profile = async (req, res) => {
+  //show admin acount
   if (req.Admin) {
-    return res.send(req.Admin);
+    return await res.send(req.Admin);
   } else {
     return res.status(401).json({ message: "Invalid token" });
   }
 };
 
-exports.dashboard = (req, res) => {
-  Admin.find(
+exports.dashboard = async (req, res) => {
+  //get all admin
+  await Admin.find(
     {},
     { fullName: 1, email: 1, _id: 0, hash_password: 1 },
     (err, data) => {
@@ -80,7 +88,9 @@ exports.dashboard = (req, res) => {
   );
 };
 
-exports.forgotPassword = (req, res) => {
+exports.forgotPassword = async (req, res) => {
+  //input email
+  //input newpassword
   if (req.body.newpassword.length < 8) {
     return res.json({
       success: false,
@@ -88,7 +98,7 @@ exports.forgotPassword = (req, res) => {
     });
   }
 
-  Admin.findOne(
+  await Admin.findOne(
     {
       email: req.body.email,
     },
@@ -116,10 +126,12 @@ exports.forgotPassword = (req, res) => {
   );
 };
 
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
   //comfirm password for delete admin acount
+  //input email
+  //input confirmPassword
 
-  Admin.findOne({ email: req.body.email }, (err, admin) => {
+  await Admin.findOne({ email: req.body.email }, (err, admin) => {
     if (err) return res.json({ success: false, error: err });
     if (admin.comparePassword(req.body.confirmPassword)) {
       Admin.findOneAndDelete({ email: req.body.email }, (err, admin) => {

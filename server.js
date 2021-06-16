@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const packageRoute = require("./route/package");
 const userRoute = require("./route/user")
 const adminRoute = require("./route/admin")
@@ -42,19 +41,6 @@ app.use("/package", packageRoute);
 app.use("/user",userRoute);
 
 //Admin Part
-app.use((req, res, next) => {
-  if (req.headers && req.headers.authorization ) {
-    jwt.verify(req.headers.authorization, 'RESTFULAPIs', (err, decode) =>{
-      if (err) req.Admin = undefined;
-      req.Admin = decode;
-      next();
-    });
-  } else {
-    req.Admin = undefined;
-    next();
-  }
-});
-
 app.use("/admin",adminRoute) 
 
 app.use((req, res) => {
