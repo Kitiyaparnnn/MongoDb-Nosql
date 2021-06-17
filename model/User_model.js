@@ -14,15 +14,15 @@ const UserSchema = mongoose.Schema({
   mobile: { type: Number, required: [true, "What is your contact number?"] },
   email: { type: String, required: true },
   school: {
-    name: String,
-    faculty: String,
-    grade: String,
+    name: {type: String ,default:''},
+    faculty: {type: String ,default:''},
+    grade: {type: String ,default:''},
   },
   photo: [
     {
       user_idcard: { type: Buffer, required: true },
       idcard: { type: Buffer, required: true },
-      studentcard: Buffer,
+      studentcard: {type: Buffer},
     },
   ],
 });

@@ -8,14 +8,24 @@ var path = require("path");
 //upload process
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join('./images/'));
+    if (file.fieldname === "user_idcard")
+      cb(null, path.join("./images/user_idcard/"));
+    if (file.fieldname === "idcard") cb(null, path.join("./images/idcard/"));
+    if (file.fieldname === "studentcard")
+      cb(null, path.join("./images/studentcard/"));
   },
   filename: (req, file, cb) => {
-    cb(null, file.fieldname + "-" + Date.now());
+    const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
+    cb(null, file.fieldname + ext);
   },
 });
 
-var upload = multer({ storage: storage });
+const upload = multer({ storage: storage });
+const multiUploads = upload.fields([
+  { name: "user_idcard", maxCount: 1 },
+  { name: "idcard", maxCount: 1 },
+  { name: "studentcard", maxCount: 1 },
+]);
 
 //Get all users
 router.get("/", async (req, res) => {
@@ -33,38 +43,56 @@ router.get("/:id", async (req, res) => {
   });
 });
 
-router.post("/", upload.array("photoes"), async (req, res) => {
-  const { name, date, Idcard, address, mobile, email, school, photo } =
-    req.body;
+router.post("/", multiUploads, (req, res) => {
+  const {
+    firstname,
+    lastname,
+    date,
+    idcard,
+    houseNo,
+    subdistrict,
+    district,
+    province,
+    zipcode,
+    mobile,
+    email,
+    school,
+  } = req.body;
+
+  if (idcard.length != 13) {
+    return res.json({ success: false, message: "idcard must have 13 digits" });
+  }
+
+  if (mobile.length < 9 || mobile.length > 10) {
+    return res.json({ success: false, message: "mobile is not valid" });
+  }
 
   const newuser = {
-    name,
+    name: firstname + " " + lastname,
     date,
-    Idcard,
-    address,
+    Idcard: idcard,
+    address:{
+      houseNo,
+      subdistrict,
+      district,
+      province,
+      zipcode
+    },
     mobile,
     email,
     school,
     photo: {
-      user_idcard: fs.readFileSync(
-        path.join('./images/' + req.file.filename)
-      ),
-      idcard: fs.readFileSync(
-        path.join('./images/' + req.file.filename)
-      ),
-      studentcard: fs.readFileSync(
-        path.join('./images/' + req.file.filename)
-      ),
+      user_idcard: req.files.user_idcard[0].path,
+      idcard: req.files.idcard[0].path,
+      studentcard: req.files.studentcard[0].path,
     },
   };
-  await User.create(newuser, (err, data) => {
+  User.create(newuser, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
       return res.json({ success: true, data });
     }
   });
 });
-
-
 
 module.exports = router;

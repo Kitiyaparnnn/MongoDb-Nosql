@@ -52,6 +52,7 @@ app.use("/image",image)
 
 //View engines
 // app.set("view engine", "ejs");
+
 app.use((req, res) => {
   res.status(404).send({ url: req.originalUrl + ' not found' })
 });
