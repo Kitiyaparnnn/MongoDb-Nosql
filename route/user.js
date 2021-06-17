@@ -8,7 +8,7 @@ var path = require("path");
 //upload process
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads");
+    cb(null, path.join('./images/'));
   },
   filename: (req, file, cb) => {
     cb(null, file.fieldname + "-" + Date.now());
@@ -33,7 +33,7 @@ router.get("/:id", async (req, res) => {
   });
 });
 
-router.post("/", upload.array("image"), async (req, res) => {
+router.post("/", upload.array("photoes"), async (req, res) => {
   const { name, date, Idcard, address, mobile, email, school, photo } =
     req.body;
 
@@ -47,13 +47,13 @@ router.post("/", upload.array("image"), async (req, res) => {
     school,
     photo: {
       user_idcard: fs.readFileSync(
-        path.join(__dirname + "/uploads/" + req.file.filename)
+        path.join('./images/' + req.file.filename)
       ),
       idcard: fs.readFileSync(
-        path.join(__dirname + "/uploads/" + req.file.filename)
+        path.join('./images/' + req.file.filename)
       ),
       studentcard: fs.readFileSync(
-        path.join(__dirname + "/uploads/" + req.file.filename)
+        path.join('./images/' + req.file.filename)
       ),
     },
   };

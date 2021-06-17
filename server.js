@@ -6,6 +6,7 @@ const express = require("express");
 const packageRoute = require("./route/package");
 const userRoute = require("./route/user")
 const adminRoute = require("./route/admin")
+const image = require("./route/Image")
 
 const app = express();
 
@@ -31,25 +32,29 @@ mongoose.connection.once("open", function () {
 
 //First page
 app.get("/",(req, res) => {
+  // res.render('filename view',{object},(err) => {})
   return res.send('hello khemdev')
 })
 
 //Package Part
-app.use("/package", packageRoute);
+app.use("/package", packageRoute,);
 
-//User Part
+//User Part 
 app.use("/user",userRoute);
 
 //Admin Part
 app.use("/admin",adminRoute) 
 
-app.use((req, res) => {
-  res.status(404).send({ url: req.originalUrl + ' not found' })
-});
+
+
+//test image upload
+app.use("/image",image)
 
 //View engines
 // app.set("view engine", "ejs");
-
+app.use((req, res) => {
+  res.status(404).send({ url: req.originalUrl + ' not found' })
+});
 app.use(cors());
 
 const PORT = process.env.PORT || 3001

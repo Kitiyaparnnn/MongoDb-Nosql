@@ -6,7 +6,7 @@ router.get("/", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
-      return res.json({ success: true, message: data.length, data });
+      return res.json({ success: true, message: 'all packges is'+ data.length, data });
     }
   });
 });
@@ -31,20 +31,10 @@ router.post("/", async (req, res) => {
   ) {
     return res.json({ success: false, error: "Invalid Input" });
   }
-  let data = new Package();
-  data.package_type = package_type;
-  data.name = name;
-  data.internet_type = internet_type;
-  data.price = price;
-  data.calltime = calltime;
-  data.internet_speed = internet_speed;
-  data.moreDetials.description = moreDetials.description;
-  data.moreDetials.description = moreDetials.description;
-  data.moreDetials.wifi = moreDetials.wifi;
-  data.moreDetials.morebenefit = moreDetials.morebenefit;
+  let data = new Package(req.body);
   await data.save((err) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
+    return res.json({ success: true ,message: 'package is added'});
   });
 });
 
@@ -75,7 +65,7 @@ router.put("/:id", async (req, res) => {
       if (err) return res.json({ success: false, error: err });
     }
   );
-  return res.json({ success: true, update });
+  return res.json({ success: true,packageUpdate : update });
 });
 
 router.delete("/:id", async (req, res) => {
@@ -84,7 +74,7 @@ router.delete("/:id", async (req, res) => {
     if (err) return res.json({ success: false, error });
     else if (data === undefined || data === null)
       return res.json({ success: false, message: "There is any package"});
-      else return res.json({ success: true });
+      else return res.json({ success: true,message: 'package is deleted' });
   });
 });
 
@@ -110,7 +100,7 @@ router.get("/bestlist", async (req, res) => {
     { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
     (err, data) => {
       if (err) return res.json({ success: false,message: 'Please select all package option', error: err });
-      else return res.json({ success: true, messages: data.length, data });
+      else return res.json({ success: true, messages: 'bestlist has '+ data.length, data });
     }
   ).sort({ price: 1, calltime: 1, internet_speed: 1 }).limit(3);
 

@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
       return res.status(400).send({
         success: false,
         message: "Email already exists",
+        error : err
       });
     } else {
       admin.hash_password = undefined;
