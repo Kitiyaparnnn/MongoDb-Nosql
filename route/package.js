@@ -6,7 +6,7 @@ router.get("/", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
-      return res.json({ success: true, message: 'all packges is'+ data.length, data });
+      return res.json({ success: true, message: 'all packges is '+ data.length, data });
     }
   });
 });
@@ -86,28 +86,29 @@ router.get("/bestlist", async (req, res) => {
     maxprice,
     minCall,
     maxCall,
-    internetSpeed,
+    minInternetSpeed,
+    maxInternetSpeed,
   } = req.body;
 
   await Package.find(
     {
       package_type: packageType,
-      internet_type: internetType,
+      // internet_type: internetType,
       price: { $gte: minprice, $lte: maxprice },
       calltime: { $gte: minCall, $lte: maxCall },
-      internet_speed: { $gte: internetSpeed },
+      internet_speed: { $gte: minInternetSpeed ,$lte: maxInternetSpeed},
     },
     { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
     (err, data) => {
       if (err) return res.json({ success: false,message: 'Please select all package option', error: err });
       else return res.json({ success: true, messages: 'bestlist has '+ data.length, data });
     }
-  ).sort({ price: 1, calltime: 1, internet_speed: 1 }).limit(3);
+  ).sort({ price: 1,calltime: -1, internet_speed: -1 }).limit(3);
 
 });
 
 router.get("/ranges",(req, res) => {
-  return res.json({minprice: 49,maxprice:2000,minCall:0,maxCall:800,minInternetSpeed:0.5,maxInternetSpeed:100})
+  return res.json({minprice: 49,maxprice:2000,minCall:0,maxCall:800,minInternetSpeed:0.5,maxInternetSpeed:1000})
 })
 
 module.exports = router;

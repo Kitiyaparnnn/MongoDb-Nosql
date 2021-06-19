@@ -5,14 +5,15 @@ const PackageSchema = mongoose.Schema({
     name: String,
     internet_type: {type: String, required:true},
     price: {type: Number, required:true},
-    calltime:Number,
-    internet_speed: {type: Number, required:true},//GB,100 is unlimited
+    calltime:{type :Number,default:0},//เฉพาะโทรนอกเครือข่าย
+    internet_speed: {type: Number, required:true},//GB,1000 is unlimited //call data
     moreDetials:{
         description:[{type:String}],
         wifi:String, 
         morebenefit:[{type:String}]
     }
 })
+
 
 //limit price 49-2000
 
