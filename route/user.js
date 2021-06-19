@@ -8,11 +8,12 @@ var path = require("path");
 //upload process
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (file.fieldname === "user_idcard")
-      cb(null, path.join("./images/user_idcard/"));
-    if (file.fieldname === "idcard") cb(null, path.join("./images/idcard/"));
-    if (file.fieldname === "studentcard")
-      cb(null, path.join("./images/studentcard/"));
+    if (file.fieldname === "faceImage")
+      cb(null, path.join("./images/faceImage/"));
+    if (file.fieldname === "citizenImage") 
+      cb(null, path.join("./images/citizenImage/"));
+    if (file.fieldname === "univImage")
+      cb(null, path.join("./images/univImage/"));
   },
   filename: (req, file, cb) => {
     const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
@@ -22,9 +23,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 const multiUploads = upload.fields([
-  { name: "user_idcard", maxCount: 1 },
-  { name: "idcard", maxCount: 1 },
-  { name: "studentcard", maxCount: 1 },
+  { name: "faceImage", maxCount: 1 },
+  { name: "citizenImage", maxCount: 1 },
+  { name: "univImage", maxCount: 1 },
 ]);
 
 //Get all users
@@ -47,44 +48,44 @@ router.post("/", multiUploads, (req, res) => {
   const {
     firstname,
     lastname,
-    date,
-    idcard,
+    birthday,
+    nationalId,
     houseNo,
     subdistrict,
     district,
     province,
-    zipcode,
-    mobile,
+    postcode,
+    phoneNumber,
     email,
-    school,
+    university,
   } = req.body;
 
-  if (idcard.length != 13) {
-    return res.json({ success: false, message: "idcard must have 13 digits" });
+  if (nationalId.length != 13) {
+    return res.json({ success: false, message: "nationalId must have 13 digits" });
   }
 
-  if (mobile.length < 9 || mobile.length > 10) {
+  if (phoneNumber.length < 9 || phoneNumber.length > 10) {
     return res.json({ success: false, message: "mobile is not valid" });
   }
 
   const newuser = {
     name: firstname + " " + lastname,
-    date,
-    Idcard: idcard,
+    birthday,
+    nationalId,
     address:{
       houseNo,
       subdistrict,
       district,
       province,
-      zipcode
+      postcode
     },
-    mobile,
+    phoneNumber,
     email,
-    school,
-    photo: {
-      user_idcard: req.files.user_idcard[0].path,
-      idcard: req.files.idcard[0].path,
-      studentcard: req.files.studentcard[0].path,
+    university,
+    photos: {
+      faceImage: req.files.faceImage[0].path,
+      citizenImage: req.files.citizenImage[0].path,
+      univImage: req.files.univImage[0].path,
     },
   };
   User.create(newuser, (err, data) => {
