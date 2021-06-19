@@ -6,7 +6,11 @@ router.get("/", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
-      return res.json({ success: true, message: 'all packges is '+ data.length, data });
+      return res.json({
+        success: true,
+        message: "all packges is " + data.length,
+        data,
+      });
     }
   });
 });
@@ -34,7 +38,7 @@ router.post("/", async (req, res) => {
   let data = new Package(req.body);
   await data.save((err) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true ,message: 'package is added'});
+    return res.json({ success: true, message: "package is added" });
   });
 });
 
@@ -49,9 +53,9 @@ router.put("/:id", async (req, res) => {
     moreDetials,
   } = req.body;
 
-  const {id} = req.params;
+  const { id } = req.params;
   const update = await Package.findByIdAndUpdate(
-   id,
+    id,
     {
       package_type,
       name,
@@ -65,16 +69,16 @@ router.put("/:id", async (req, res) => {
       if (err) return res.json({ success: false, error: err });
     }
   );
-  return res.json({ success: true,packageUpdate : update });
+  return res.json({ success: true, packageUpdate: update });
 });
 
 router.delete("/:id", async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   await Package.findByIdAndDelete(id, (err, data) => {
     if (err) return res.json({ success: false, error });
     else if (data === undefined || data === null)
-      return res.json({ success: false, message: "There is any package"});
-      else return res.json({ success: true,message: 'package is deleted' });
+      return res.json({ success: false, message: "There is any package" });
+    else return res.json({ success: true, message: "package is deleted" });
   });
 });
 
@@ -90,25 +94,74 @@ router.get("/bestlist", async (req, res) => {
     maxInternetSpeed,
   } = req.body;
 
-  await Package.find(
-    {
-      package_type: packageType,
-      // internet_type: internetType,
-      price: { $gte: minprice, $lte: maxprice },
-      calltime: { $gte: minCall, $lte: maxCall },
-      internet_speed: { $gte: minInternetSpeed ,$lte: maxInternetSpeed},
-    },
-    { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
-    (err, data) => {
-      if (err) return res.json({ success: false,message: 'Please select all package option', error: err });
-      else return res.json({ success: true, messages: 'bestlist has '+ data.length, data });
-    }
-  ).sort({ price: 1,calltime: -1, internet_speed: -1 }).limit(3);
+  if (packageType === "Post Paid") {
+    await Package.find(
+      {
+        package_type: packageType,
+        // internet_type: internetType,
+        price: { $gte: minprice, $lte: maxprice },
+        calltime: { $gte: minCall, $lte: maxCall },
+        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+      },
+      { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
+      (err, data) => {
+        if (err)
+          return res.json({
+            success: false,
+            message: "Please select all package option",
+            error: err,
+          });
+        else
+          return res.json({
+            success: true,
+            messages: "bestlist has " + data.length,
+            data,
+          });
+      }
+    )
+      .sort({ price: 1, calltime: -1, internet_speed: -1 })
+      .limit(3);
+  }
 
+  if (packageType === "Pre Paid") {
+    await Package.find(
+      {
+        package_type: packageType,
+        // internet_type: internetType,
+        price: { $gte: minprice, $lte: maxprice },
+        calltime: { $gte: minCall, $lte: maxCall },
+        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+      },
+      { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
+      (err, data) => {
+        if (err)
+          return res.json({
+            success: false,
+            message: "Please select all package option",
+            error: err,
+          });
+        else
+          return res.json({
+            success: true,
+            messages: "bestlist has " + data.length,
+            data,
+          });
+      }
+    )
+      .sort({ calltime: 1,internet_speed: -1 ,price: -1 })
+      .limit(3);
+  }
 });
 
-router.get("/ranges",(req, res) => {
-  return res.json({minprice: 49,maxprice:2000,minCall:0,maxCall:800,minInternetSpeed:0.5,maxInternetSpeed:1000})
-})
+router.get("/ranges", (req, res) => {
+  return res.json({
+    minprice: 19,
+    maxprice: 2000,
+    minCall: 0,
+    maxCall: 800,
+    minInternetSpeed: 0.5,
+    maxInternetSpeed: 1000,
+  });
+});
 
 module.exports = router;

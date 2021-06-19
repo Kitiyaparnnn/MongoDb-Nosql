@@ -15,15 +15,15 @@ const PackageSchema = mongoose.Schema({
 })
 
 
-//limit price 49-2000
+//limit price 19-2000
 
 //Post Paid
 //limit calltime 0-800 min
-//limit internet_speed 1.5-unlimited(value = 100) Gb
+//limit internet_speed 1.5-unlimited(value = 1000) Gb
 
 //Pre Paid
-//calltime 0.5-0.9 THB/min
-//internet_speed 0.5-2 THB/MB
+//calltime(day) 1-60
+//internet_speed 1-unlimited(value = 1000)
 
 
 
