@@ -10,7 +10,7 @@ const orderRoute = require("./route/order");
 // const image = require("./route/Image")
 
 const app = express();
-// app.use(cors());
+app.use(cors());
 // app.options('*', cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
