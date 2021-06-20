@@ -10,7 +10,8 @@ const orderRoute = require("./route/order");
 // const image = require("./route/Image")
 
 const app = express();
-
+app.use(cors());
+app.options('*', cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -58,7 +59,6 @@ mongoose.connection.once("open", function () {
   app.use((req, res) => {
     res.status(404).send({ url: req.originalUrl + " not found" });
   });
-  app.use(cors());
 
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, function () {

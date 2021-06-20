@@ -148,19 +148,26 @@ router.get("/bestlist", async (req, res) => {
           });
       }
     )
-      .sort({ calltime: 1,internet_speed: -1 ,price: -1 })
+      .sort({ calltime: 1, internet_speed: -1, price: -1 })
       .limit(3);
   }
 });
 
 router.get("/ranges", (req, res) => {
+  const ranges = {
+    minPrice: 19,
+    maxPrice: 2000,
+    minCallAmount: 0,
+    maxCallAmount: 800,
+    minInternetSpeedAmount: 0.5,
+    maxInternetSpeedAmount: 1000,
+    minCallRate: number,
+    maxCallRate: number,
+    minInternetSpeedRate: number,
+    maxInternetSpeedRate: number,
+  };
   return res.json({
-    minprice: 19,
-    maxprice: 2000,
-    minCall: 0,
-    maxCall: 800,
-    minInternetSpeed: 0.5,
-    maxInternetSpeed: 1000,
+    ranges
   });
 });
 
