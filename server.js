@@ -39,16 +39,16 @@ mongoose.connection.once("open", function () {
   });
 
   //Package Part
-  app.use("/package", packageRoute);
+  app.use("/packages", packageRoute);
 
   //User Part
-  app.use("/user", userRoute);
+  app.use("/users", userRoute);
 
   //Admin Part
-  app.use("/admin", adminRoute);
+  app.use("/admins", adminRoute);
 
   //Order Part
-  app.use("/order", orderRoute);
+  app.use("/orders", orderRoute);
 
   //test image upload
   // app.use("/image",image)

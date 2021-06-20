@@ -29,7 +29,7 @@ const multiUploads = upload.fields([
 ]);
 
 //Get all users
-router.get("/", async (req, res) => {
+router.get("/all", async (req, res) => {
   await User.find((err, data) => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true, data });
@@ -44,7 +44,7 @@ router.get("/:id", async (req, res) => {
   });
 });
 
-router.post("/", multiUploads, (req, res) => {
+router.post("/adduser", multiUploads, (req, res) => {
   const {
     firstname,
     lastname,

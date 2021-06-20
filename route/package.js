@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Package = require("../model/Package_model");
 
-router.get("/", (req, res) => {
+router.get("/all", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
@@ -150,6 +150,76 @@ router.get("/bestlist", async (req, res) => {
     )
       .sort({ calltime: 1, internet_speed: -1, price: -1 })
       .limit(3);
+  }
+});
+
+router.get("/filter", async (req, res) => {
+  const {
+    packageType,
+    internetType,
+    minprice,
+    maxprice,
+    minCall,
+    maxCall,
+    minInternetSpeed,
+    maxInternetSpeed,
+  } = req.body;
+
+  if (packageType === "Post Paid") {
+    await Package.find(
+      {
+        package_type: packageType,
+        // internet_type: internetType,
+        price: { $gte: minprice, $lte: maxprice },
+        calltime: { $gte: minCall, $lte: maxCall },
+        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+      },
+      { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
+      (err, data) => {
+        if (err)
+          return res.json({
+            success: false,
+            message: "Please select all package option",
+            error: err,
+          });
+        else
+          return res.json({
+            success: true,
+            messages: "bestlist has " + data.length,
+            data,
+          });
+      }
+    )
+      .sort({ price: 1, calltime: -1, internet_speed: -1 })
+      .limit(3);
+  }
+
+  if (packageType === "Pre Paid") {
+    await Package.find(
+      {
+        package_type: packageType,
+        // internet_type: internetType,
+        price: { $gte: minprice, $lte: maxprice },
+        calltime: { $gte: minCall, $lte: maxCall },
+        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+      },
+      { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
+      (err, data) => {
+        if (err)
+          return res.json({
+            success: false,
+            message: "Please select all package option",
+            error: err,
+          });
+        else
+          return res.json({
+            success: true,
+            messages: "bestlist has " + data.length,
+            data,
+          });
+      }
+    )
+      .sort({ calltime: 1, internet_speed: -1, price: -1 })
   }
 });
 
