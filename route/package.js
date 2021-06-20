@@ -161,13 +161,21 @@ router.get("/ranges", (req, res) => {
     maxCallAmount: 800,
     minInternetSpeedAmount: 0.5,
     maxInternetSpeedAmount: 1000,
-    minCallRate: number,
-    maxCallRate: number,
-    minInternetSpeedRate: number,
-    maxInternetSpeedRate: number,
+    // minCallRate: number,
+    // maxCallRate: number,
+    // minInternetSpeedRate: number,
+    // maxInternetSpeedRate: number,
   };
+  
   return res.json({
-    ranges
+
+    // ranges
+    minPrice: 19,
+    maxPrice: 2000,
+    minCallAmount: 0,
+    maxCallAmount: 800,
+    minInternetSpeedAmount: 0.5,
+    maxInternetSpeedAmount: 1000,
   });
 });
 
