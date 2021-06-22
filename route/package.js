@@ -86,22 +86,24 @@ router.get("/bestlist", async (req, res) => {
   const {
     packageType,
     internetType,
-    minprice,
-    maxprice,
-    minCall,
-    maxCall,
-    minInternetSpeed,
-    maxInternetSpeed,
+    minFee,
+    maxFee,
+    minFreeCall,
+    maxFreeCall,
+    minData,
+    maxData,
+    minDuration,
+    maxDuration,
   } = req.body;
 
   if (packageType === "Post Paid") {
     await Package.find(
       {
         package_type: packageType,
-        // internet_type: internetType,
-        price: { $gte: minprice, $lte: maxprice },
-        calltime: { $gte: minCall, $lte: maxCall },
-        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+        internet_type: internetType,
+        price: { $gte: minFee, $lte: maxFee },
+        calltime: { $gte: minFreeCall, $lte: maxFreeCall },
+        internet_speed: { $gte: minData, $lte: maxData },
       },
       { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
       (err, data) => {
@@ -128,9 +130,9 @@ router.get("/bestlist", async (req, res) => {
       {
         package_type: packageType,
         // internet_type: internetType,
-        price: { $gte: minprice, $lte: maxprice },
-        calltime: { $gte: minCall, $lte: maxCall },
-        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+        price: { $gte: minFee, $lte: maxFee },
+        calltime: { $gte: minDuration, $lte: maxDuration },
+        internet_speed: { $gte: minData, $lte: maxData },
       },
       { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
       (err, data) => {
@@ -157,22 +159,24 @@ router.get("/filter", async (req, res) => {
   const {
     packageType,
     internetType,
-    minprice,
-    maxprice,
-    minCall,
-    maxCall,
-    minInternetSpeed,
-    maxInternetSpeed,
+    minFee,
+    maxFee,
+    minFreeCall,
+    maxFreeCall,
+    minData,
+    maxData,
+    minDuration,
+    maxDuration
   } = req.body;
 
   if (packageType === "Post Paid") {
     await Package.find(
       {
         package_type: packageType,
-        // internet_type: internetType,
-        price: { $gte: minprice, $lte: maxprice },
-        calltime: { $gte: minCall, $lte: maxCall },
-        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+        internet_type: internetType,
+        price: { $gte: minFee, $lte: maxFee },
+        calltime: { $gte: minFreeCall, $lte: maxFreeCall },
+        internet_speed: { $gte: minData, $lte: maxData },
       },
       { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
       (err, data) => {
@@ -199,9 +203,9 @@ router.get("/filter", async (req, res) => {
       {
         package_type: packageType,
         // internet_type: internetType,
-        price: { $gte: minprice, $lte: maxprice },
-        calltime: { $gte: minCall, $lte: maxCall },
-        internet_speed: { $gte: minInternetSpeed, $lte: maxInternetSpeed },
+        price: { $gte: minFee, $lte: maxFee },
+        calltime: { $gte: minDuration, $lte: maxDuration },
+        internet_speed: { $gte: minData, $lte: maxData },
       },
       { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
       (err, data) => {
@@ -218,34 +222,35 @@ router.get("/filter", async (req, res) => {
             data,
           });
       }
-    )
-      .sort({ calltime: 1, internet_speed: -1, price: -1 })
+    ).sort({ calltime: 1, internet_speed: -1, price: -1 });
   }
 });
 
 router.get("/ranges", (req, res) => {
   const ranges = {
-    minPrice: 19,
-    maxPrice: 2000,
-    minCallAmount: 0,
-    maxCallAmount: 800,
-    minInternetSpeedAmount: 0.5,
-    maxInternetSpeedAmount: 1000,
-    // minCallRate: number,
-    // maxCallRate: number,
-    // minInternetSpeedRate: number,
-    // maxInternetSpeedRate: number,
+    prepaid: {
+      minFee: 19,
+      maxFee: 600,
+      minData: 1,
+      maxData: 1000,
+      minDuration: 1,
+      maxDuration: 60,
+    },
+    postpaid: {
+      minFee: 250,
+      maxFee: 1400,
+      minFreeCall: 0,
+      maxFreeCall: 800,
+      minData: 1.5,
+      maxData: 1000,
+      minSpeed: 0,
+      maxSpeed: 1000,
+    },
   };
-  
-  return res.json({
 
-    // ranges
-    minPrice: 19,
-    maxPrice: 2000,
-    minCallAmount: 0,
-    maxCallAmount: 800,
-    minInternetSpeedAmount: 0.5,
-    maxInternetSpeedAmount: 1000,
+  return res.json({
+    messages: "maxData 1000 = unlimited",
+    ranges,
   });
 });
 
