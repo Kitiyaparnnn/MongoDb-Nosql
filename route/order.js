@@ -9,7 +9,7 @@ router.get("/all", (req, res) => {
     if (err) return res.json({ success: false, error: err });
     if (orders.length == 0)
       return res.json({ success: true, message: "Empty order" });
-    return res.json({ success: true, orders });
+    return res.json({ success: true,message:"there is "+orders.length+" orders", orders });
   }).populate('user packages','name -_id')
 });
 
@@ -34,7 +34,7 @@ router.post("/addOrder", async (req, res) => {
       price: 1,
     }
   );
-  console.log(userOrder, packageOrder);
+  // console.log(userOrder, packageOrder);
   Order.create(
     {
       user: userOrder,
@@ -42,7 +42,7 @@ router.post("/addOrder", async (req, res) => {
     },
     (err, order) => {
       if (err) return res.json({ success: false, error: err });
-      return res.json({ success: true, order });
+      return res.json({ success: true, messages: "Order add successfully",order });
     }
   );
 });
