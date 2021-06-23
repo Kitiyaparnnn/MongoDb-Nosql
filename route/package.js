@@ -227,7 +227,6 @@ router.get("/filter", async (req, res) => {
         }
       )
         .sort({ internet_speed: 1,price: 1,name:1, calltime: -1 })
-        .limit(3);
     }
   }
 
@@ -257,7 +256,6 @@ router.get("/filter", async (req, res) => {
       }
     )
       .sort({ calltime: 1, internet_speed: -1, price: -1 })
-      .limit(3);
   }
 });
 
