@@ -22,7 +22,7 @@ const UserSchema = mongoose.Schema({
     {
       faceImage: { type: Buffer, required: true },
       citizenImage: { type: Buffer, required: true },
-      univImage: { type: Buffer, default:0},
+      univImage: { type: Buffer },
     },
   ],
 });

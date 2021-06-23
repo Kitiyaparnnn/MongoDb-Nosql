@@ -10,14 +10,14 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === "faceImage")
       cb(null, path.join("./images/faceImage/"));
-    if (file.fieldname === "citizenImage") 
+    if (file.fieldname === "citizenImage")
       cb(null, path.join("./images/citizenImage/"));
     if (file.fieldname === "univImage")
       cb(null, path.join("./images/univImage/"));
   },
   filename: (req, file, cb) => {
     const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
-    cb(null, file.fieldname + ext);
+    cb(null, file.originalname + ext);
   },
 });
 
@@ -29,22 +29,22 @@ const multiUploads = upload.fields([
 ]);
 
 //Get all users
-router.get("/all", async (req, res) => {
-  await User.find((err, data) => {
+router.get("/", async (req, res) => {
+  await User.find({}, { name: 1, _id: 1 }, (err, user) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true, data });
+    return res.json({ success: true, users: user });
   });
 });
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  await User.findById(id, (err, data) => {
+  await User.findById(id, (err, user) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true, data });
+    return res.json({ success: true, user });
   });
 });
 
-router.post("/adduser", multiUploads, (req, res) => {
+router.post("/", multiUploads, (req, res) => {
   const {
     firstname,
     lastname,
@@ -61,7 +61,10 @@ router.post("/adduser", multiUploads, (req, res) => {
   } = req.body;
 
   if (nationalId.length != 13) {
-    return res.json({ success: false, message: "nationalId must have 13 digits" });
+    return res.json({
+      success: false,
+      message: "nationalId must have 13 digits",
+    });
   }
 
   if (phoneNumber.length < 9 || phoneNumber.length > 10) {
@@ -72,12 +75,12 @@ router.post("/adduser", multiUploads, (req, res) => {
     name: firstname + " " + lastname,
     birthday,
     nationalId,
-    address:{
+    address: {
       houseNo,
       subdistrict,
       district,
       province,
-      postcode
+      postcode,
     },
     phoneNumber,
     email,
@@ -88,11 +91,24 @@ router.post("/adduser", multiUploads, (req, res) => {
       univImage: req.files.univImage[0].path,
     },
   };
-  User.create(newuser, (err, data) => {
+   User.create(newuser, (err, user) => {
     if (err) return res.json({ success: false, error: err });
     else {
-      return res.json({ success: true, data });
+      return res.json({
+        success: true,
+        message: "Customer's data is saved",
+        user,
+      });
     }
+  });
+});
+
+router.delete("/:id", async (req, res) => {
+  await User.findByIdAndDelete(req.params.id, (err, user) => {
+    if (err) return res.json({ success: false, error: err });
+    fs.unlink('./images', () =>
+      res.json({ success: true, message: "Customer's data is deleted" })
+    );
   });
 });
 

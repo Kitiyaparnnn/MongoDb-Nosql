@@ -7,7 +7,7 @@ const packageRoute = require("./route/package");
 const userRoute = require("./route/user");
 const adminRoute = require("./route/admin");
 const orderRoute = require("./route/order");
-// const image = require("./route/Image")
+const image = require("./route/Image")
 
 const app = express();
 app.use(cors());
@@ -42,7 +42,7 @@ mongoose.connection.once("open", function () {
   app.use("/packages", packageRoute);
 
   //User Part
-  app.use("/users", userRoute);
+  app.use("/customers", userRoute);
 
   //Admin Part
   app.use("/admins", adminRoute);
@@ -51,7 +51,7 @@ mongoose.connection.once("open", function () {
   app.use("/orders", orderRoute);
 
   //test image upload
-  // app.use("/image",image)
+  app.use("/image",image)
 
   //View engines
   // app.set("view engine", "ejs");

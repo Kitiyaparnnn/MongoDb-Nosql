@@ -7,6 +7,6 @@ router.post("/login",adminHandler.login)
 router.post("/profile", adminHandler.loginRequired, adminHandler.profile)
 router.get("/",adminHandler.dashboard)
 router.put("/forgotpassword",adminHandler.forgotPassword)
-router.delete("/delete",adminHandler.delete)
+router.delete("/",adminHandler.delete)
 
 module.exports = router;

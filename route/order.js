@@ -4,7 +4,7 @@ const User = require("../model/User_model");
 const Package = require("../model/Package_model");
 const Order = require("../model/Order_model");
 
-router.get("/all", (req, res) => {
+router.get("/", (req, res) => {
   Order.find({}, (err, orders) => {
     if (err) return res.json({ success: false, error: err });
     if (orders.length == 0)
@@ -13,7 +13,7 @@ router.get("/all", (req, res) => {
   }).populate('user packages','name -_id')
 });
 
-router.post("/addOrder", async (req, res) => {
+router.post("/", async (req, res) => {
   const { userId, packageId } = req.body;
 
   // "userId" : "60cb6fede2e2f62a342a8bd1",
@@ -46,5 +46,12 @@ router.post("/addOrder", async (req, res) => {
     }
   );
 });
+
+router.delete("/:id",async (req, res) => {
+   await Order.findByIdAndDelete(req.params.id, (err, order) => {
+      if(err) return res.json({ success: false, error: err })
+      return res.json({ success: true,messages:'Order is deleted', order})
+    })
+})
 
 module.exports = router;
