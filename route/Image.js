@@ -15,7 +15,7 @@ var storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
-    cb(null, file.originalname + ext);
+    cb(null, file.originalname);
   },
 });
 
@@ -37,11 +37,16 @@ const ImageSchema = new Schema({
 const Image = mongoose.model("Image", ImageSchema);
 
 router.post("/", upload, (req, res) => {
+  //error :
   const newImage = new Image();
   newImage.profile.data = req.files.profile[0].path;
   newImage.profile.contentType = "img/png";
   newImage.card.data = req.files.card[0].path;
   newImage.card.contentType = "img/png";
+  // newImage.profile.data = req.files.profile
+  // newImage.profile.contentType = "img/png";
+  // newImage.card.data = req.files.card
+  // newImage.card.contentType = "img/png";
 
   // newImage.profile.data =   fs.readFileSync("/profile/" + req.files.profile[0])
   // newImage.card.data = fs.readFileSync("/card/" + req.files.card[0])
@@ -51,8 +56,12 @@ router.post("/", upload, (req, res) => {
   // );
   // newImage.img.contentType = "image/png";
   newImage.save((err, image) => {
-    if (err) return res.json({ err });
-    return res.json({ success: true });
+    if (err)
+      return res.json({
+        message: "Plase rename your file name in english or number",
+        err,
+      });
+    return res.json({ success: true, image });
   });
 });
 
@@ -65,11 +74,40 @@ router.get("/", (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await Image.findById(req.params.id, (err, image) => {
+  await Image.findByIdAndRemove(req.params.id, (err, image) => {
     if (err) return res.json({ success: false, error: err });
-    return  console.log(image.profile.data);
+    if(image == null) return res.json({success: false,message:'Id is not valid'})
+    else {
+      // let profile = Buffer.from(image.profile.data);
+      // let ppath = profile.toLocaleString();
+
+      // let card = Buffer.from(image.card.data);
+      // let cpath = card.toLocaleString();
+      // console.log(ppath);
+      // console.log(cpath);
+      // let deleteFile = (files) => {
+      //   var i = files.length;
+      //   files.forEach((filepath) => {
+      //     if (fs.exists(filepath)) {
+      //       fs.unlink(filepath, (err) => {
+      //         i--;
+      //         if (err) return res.json({ success: false, error: err });
+      //         if (i <= 0)
+      //           return res.json({
+      //             success: true,
+      //             message: "Images in local and server are deleted ",
+      //           });
+      //       });
+      //     } else {
+      //       return res.json({ success: false, message: "Image is not exist" });
+      //     }
+      //   });
+      // };
+      // var files = [ppath, cpath];
+      // deleteFile(files);
+      return res.json({ success: true,image})
+    }
   });
-  // console.log(image.profile.data);
-})
+});
 
 module.exports = router;

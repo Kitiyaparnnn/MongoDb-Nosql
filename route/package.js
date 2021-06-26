@@ -189,7 +189,7 @@ router.get("/filter", async (req, res) => {
     maxDuration,
     isMNP,
     range,
-  } = req.body;
+  } = req.params;
 
   if (packageType == undefined) packageType = "Post Paid";
   if(internetSpeedType == undefined) internetSpeedType = 'Full Speed';

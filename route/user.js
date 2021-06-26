@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
-    cb(null, file.originalname + ext);
+    cb(null, file.originalname);
   },
 });
 
@@ -91,7 +91,7 @@ router.post("/", multiUploads, (req, res) => {
       univImage: req.files.univImage[0].path,
     },
   };
-   User.create(newuser, (err, user) => {
+  User.create(newuser, (err, user) => {
     if (err) return res.json({ success: false, error: err });
     else {
       return res.json({
@@ -104,11 +104,36 @@ router.post("/", multiUploads, (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await User.findByIdAndDelete(req.params.id, (err, user) => {
+  await User.findByIdAndRemove(req.params.id, (err, user) => {
     if (err) return res.json({ success: false, error: err });
-    fs.unlink('./images', () =>
-      res.json({ success: true, message: "Customer's data is deleted" })
-    );
+    else {
+      let faceImage = Buffer.from(user.photos.faceImage.data);
+      let fpath = faceImage.toLocaleString();
+
+      let citizenImage = Buffer.from(user.photos.citizenImage.data);
+      let cpath = citizenImage.toLocaleString();
+
+      let univImage = Buffer.from(user.photos.univImage.data);
+      let upath = univImage.toLocaleString();
+
+      let deleteImage = (files) => {
+        var i = files.length;
+        files.forEach((filepath) => {
+          if (fs.existsSync(filepath)) {
+            fs.unlink(filepath, (err) => {
+              i--;
+              if (err) return res.json({ success: false, error: err });
+              if (i <= 0)
+                return res.json({ success: true, message: "User is deleted" });
+            });
+          } else {
+            return res.json({ success: false, message: "User is not exist" });
+          }
+        });
+      };
+      var files = [fpath, cpath, upath];
+      deleteImage(files);
+    }
   });
 });
 
