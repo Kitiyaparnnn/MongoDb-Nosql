@@ -74,38 +74,33 @@ router.get("/", (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await Image.findByIdAndRemove(req.params.id, (err, image) => {
+  await Image.findById(req.params.id, (err, image) => {
     if (err) return res.json({ success: false, error: err });
-    if(image == null) return res.json({success: false,message:'Id is not valid'})
     else {
-      // let profile = Buffer.from(image.profile.data);
-      // let ppath = profile.toLocaleString();
+      let profile = Buffer.from(image.profile.data);
+      let ppath = profile.toLocaleString();
 
-      // let card = Buffer.from(image.card.data);
-      // let cpath = card.toLocaleString();
-      // console.log(ppath);
-      // console.log(cpath);
-      // let deleteFile = (files) => {
-      //   var i = files.length;
-      //   files.forEach((filepath) => {
-      //     if (fs.exists(filepath)) {
-      //       fs.unlink(filepath, (err) => {
-      //         i--;
-      //         if (err) return res.json({ success: false, error: err });
-      //         if (i <= 0)
-      //           return res.json({
-      //             success: true,
-      //             message: "Images in local and server are deleted ",
-      //           });
-      //       });
-      //     } else {
-      //       return res.json({ success: false, message: "Image is not exist" });
-      //     }
-      //   });
-      // };
-      // var files = [ppath, cpath];
-      // deleteFile(files);
-      return res.json({ success: true,image})
+      let card = Buffer.from(image.card.data);
+      let cpath = card.toLocaleString();
+      console.log(ppath);
+      console.log(cpath);
+      let deleteFile = (files) => {
+        var i = files.length;
+        files.forEach((filepath) => {
+            fs.unlink(filepath, (err) => {
+              i--;
+              if (err) return res.json({ success: false, error: err });
+              if (i <= 0)
+                return res.json({
+                  success: true,
+                  message: "Images in local and server are deleted ",
+                });
+            });
+        });
+      };
+      var files = [ppath, cpath];
+      deleteFile(files);
+      // return res.json({ success: true,image})
     }
   });
 });

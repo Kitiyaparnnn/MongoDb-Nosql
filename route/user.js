@@ -119,16 +119,12 @@ router.delete("/:id", async (req, res) => {
       let deleteImage = (files) => {
         var i = files.length;
         files.forEach((filepath) => {
-          if (fs.existsSync(filepath)) {
-            fs.unlink(filepath, (err) => {
-              i--;
-              if (err) return res.json({ success: false, error: err });
-              if (i <= 0)
-                return res.json({ success: true, message: "User is deleted" });
-            });
-          } else {
-            return res.json({ success: false, message: "User is not exist" });
-          }
+          fs.unlink(filepath, (err) => {
+            i--;
+            if (err) return res.json({ success: false, error: err });
+            if (i <= 0)
+              return res.json({ success: true, message: "User is deleted" });
+          });
         });
       };
       var files = [fpath, cpath, upath];
