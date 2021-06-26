@@ -198,6 +198,7 @@ router.get("/filter", async (req, res) => {
   if (minDuration == undefined) minDuration = 1;
   if (maxDuration == undefined) maxDuration = 60;
   if (maxData == undefined) maxData = 1000;
+  if(isMNP == undefined) isMNP = false;
 
   if (packageType === "Post Paid") {
     if (internetType == undefined) internetType = "5G";
