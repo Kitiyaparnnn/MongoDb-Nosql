@@ -74,7 +74,7 @@ router.get("/", (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await Image.findById(req.params.id, (err, image) => {
+  await Image.findByIdAndRemove(req.params.id, (err, image) => {
     if (err) return res.json({ success: false, error: err });
     else {
       let profile = Buffer.from(image.profile.data);

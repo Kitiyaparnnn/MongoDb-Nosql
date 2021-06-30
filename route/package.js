@@ -8,11 +8,26 @@ router.get("/", (req, res) => {
     else {
       return res.json({
         success: true,
-        message: "all packges is " + data.length,
         data,
       });
     }
   });
+});
+
+router.get("/:id", (req, res) => {
+  Package.findById(
+    { _id: req.params.id },
+    { moreDetials: 0 },
+    (err, package) => {
+      if (err) return res.json({ success: false, error: err });
+      else {
+        return res.json({
+          success: true,
+          package
+        });
+      }
+    }
+  );
 });
 
 router.post("/", async (req, res) => {
@@ -82,96 +97,6 @@ router.delete("/:id", async (req, res) => {
   });
 });
 
-// router.get("/bestlist", async (req, res) => {
-//   let {
-//     packageType,
-//     internetType,
-//     internetSpeedType,
-//     minFee,
-//     maxFee,
-//     minFreeCall,
-//     maxFreeCall,
-//     minData,
-//     maxData,
-//     minSpeed,
-//     maxSpeed,
-//     minDuration,
-//     maxDuration,
-//     isMNP,
-//   } = req.body;
-
-//   if (packageType === "Post Paid") {
-//     if (internetSpeedType === "Fixed Speed") {
-//       minData = minSpeed;
-//       maxData = maxSpeed;
-//     }
-//     if (isMNP) {
-//       const MNP = await Package.find({ name: /(MNP)/i },{ name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },).sort({ price: 1 });
-//       return res.json({ success: true,
-//         messages: "bestlist has " + MNP.length,
-//         packages : MNP});
-//     } else {
-//       await Package.find(
-//         {
-//           package_type: packageType,
-//           // internet_type: internetType,
-//           name:{$nin:/MNP/},
-//           price: { $gte: minFee, $lte: maxFee },
-//           calltime: { $gte: minFreeCall, $lte: maxFreeCall },
-//           internet_speed: { $gte: minData, $lte: maxData },
-//         },
-//         { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
-//         (err, data) => {
-//           if (err)
-//             return res.json({
-//               success: false,
-//               message: "Please select all package option",
-//               error: err,
-//             });
-//           else {
-//           }
-//           return res.json({
-//             success: true,
-//             messages: "bestlist has " + data.length,
-//             packages : data,
-//           });
-//         }
-//       )
-//         .sort({ internet_speed: 1,price: 1,name:1, calltime: -1 })
-//         .limit(3);
-//     }
-//   }
-
-//   if (packageType === "Pre Paid") {
-//     await Package.find(
-//       {
-//         package_type: packageType,
-//         // internet_type: internetType,
-//         price: { $gte: minFee, $lte: maxFee },
-//         calltime: { $gte: minDuration, $lte: maxDuration },
-//         internet_speed: { $gte: minData, $lte: maxData },
-//       },
-//       { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
-//       (err, data) => {
-//         if (err)
-//           return res.json({
-//             success: false,
-//             message: "Please select all package option",
-//             error: err,
-//           });
-//         else
-//           return res.json({
-//             success: true,
-//             messages: "bestlist has " + data.length,
-//            packages: data,
-//           });
-//       }
-//     )
-//       .sort({ calltime: 1, internet_speed: -1, price: -1 })
-//       .limit(3);
-//   }
-// });
-
 router.get("/filter", async (req, res) => {
   let {
     packageType,
@@ -192,13 +117,13 @@ router.get("/filter", async (req, res) => {
   } = req.params;
 
   if (packageType == undefined) packageType = "Post Paid";
-  if(internetSpeedType == undefined) internetSpeedType = 'Full Speed';
+  if (internetSpeedType == undefined) internetSpeedType = "Full Speed";
   if (minFreeCall == undefined) minFreeCall = 0;
   if (maxFreeCall == undefined) maxFreeCall = 800;
   if (minDuration == undefined) minDuration = 1;
   if (maxDuration == undefined) maxDuration = 60;
   if (maxData == undefined) maxData = 1000;
-  if(isMNP == undefined) isMNP = false;
+  if (isMNP == undefined) isMNP = false;
 
   if (packageType === "Post Paid") {
     if (internetType == undefined) internetType = "5G";

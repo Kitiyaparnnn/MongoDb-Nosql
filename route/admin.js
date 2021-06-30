@@ -5,8 +5,9 @@ const router = express.Router();
 router.post("/register",adminHandler.register)
 router.post("/login",adminHandler.login)
 router.post("/profile", adminHandler.loginRequired, adminHandler.profile)
-router.get("/",adminHandler.dashboard)
 router.put("/forgotpassword",adminHandler.forgotPassword)
 router.delete("/",adminHandler.delete)
+router.get("/",adminHandler.alladmins)
+router.get("/:id",adminHandler.findbyid)
 
 module.exports = router;

@@ -72,11 +72,11 @@ exports.profile = async (req, res) => {
   }
 };
 
-exports.dashboard = async (req, res) => {
+exports.alladmins = async (req, res) => {
   //get all admin
   await Admin.find(
     {},
-    { fullName: 1, email: 1, _id: 0, hash_password: 1 },
+    { fullName: 1, email: 1, _id: 1, hash_password: 1 },
     (err, data) => {
       res.json({
         success: true,
@@ -88,6 +88,19 @@ exports.dashboard = async (req, res) => {
     }
   );
 };
+
+exports.findbyid = async (req, res) => {
+  await Admin.findById(
+    {_id: req.params.id},
+    { fullName: 1, email: 1, _id: 0, hash_password: 1 },
+    (err, admin) => {
+      res.json({
+        success: true,
+        admin
+      });
+    }
+  );
+}
 
 exports.forgotPassword = async (req, res) => {
   //input email
