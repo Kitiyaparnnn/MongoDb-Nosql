@@ -15,19 +15,47 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-  Package.findById(
-    { _id: req.params.id },
-    { moreDetials: 0 },
-    (err, package) => {
-      if (err) return res.json({ success: false, error: err });
-      else {
-        return res.json({
-          success: true,
-          package
-        });
+  if (req.params.id === "ranges") {
+    const ranges = {
+      prepaid: {
+        minFee: 19,
+        maxFee: 600,
+        minData: 1,
+        maxData: 1000,
+        minDuration: 1,
+        maxDuration: 60,
+      },
+      postpaid: {
+        minFee: 250,
+        maxFee: 1400,
+        minFreeCall: 0,
+        maxFreeCall: 800,
+        minData: 1.5,
+        maxData: 1000,
+        minSpeed: 1.5,
+        maxSpeed: 1000,
+      },
+    };
+
+    return res.json({
+      messages: "maxData,maxSpeed 1000 = unlimited",
+      ranges,
+    });
+  } else {
+    Package.findById(
+      { _id: req.params.id },
+      { moreDetials: 0 },
+      (err, package) => {
+        if (err) return res.json({ success: false, error: err });
+        else {
+          return res.json({
+            success: true,
+            package,
+          });
+        }
       }
-    }
-  );
+    );
+  }
 });
 
 router.post("/", async (req, res) => {
@@ -225,32 +253,32 @@ router.get("/filter", async (req, res) => {
   }
 });
 
-router.get("/ranges", (req, res) => {
-  const ranges = {
-    prepaid: {
-      minFee: 19,
-      maxFee: 600,
-      minData: 1,
-      maxData: 1000,
-      minDuration: 1,
-      maxDuration: 60,
-    },
-    postpaid: {
-      minFee: 250,
-      maxFee: 1400,
-      minFreeCall: 0,
-      maxFreeCall: 800,
-      minData: 1.5,
-      maxData: 1000,
-      minSpeed: 1.5,
-      maxSpeed: 1000,
-    },
-  };
+// router.get("/ranges", (req, res) => {
+//   const ranges = {
+//     prepaid: {
+//       minFee: 19,
+//       maxFee: 600,
+//       minData: 1,
+//       maxData: 1000,
+//       minDuration: 1,
+//       maxDuration: 60,
+//     },
+//     postpaid: {
+//       minFee: 250,
+//       maxFee: 1400,
+//       minFreeCall: 0,
+//       maxFreeCall: 800,
+//       minData: 1.5,
+//       maxData: 1000,
+//       minSpeed: 1.5,
+//       maxSpeed: 1000,
+//     },
+//   };
 
-  return res.json({
-    messages: "maxData,maxSpeed 1000 = unlimited",
-    ranges,
-  });
-});
+//   return res.json({
+//     messages: "maxData,maxSpeed 1000 = unlimited",
+//     ranges,
+//   });
+// });
 
 module.exports = router;

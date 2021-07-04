@@ -13,6 +13,11 @@ router.get("/", (req, res) => {
   }).populate('user packages','name -_id')
 });
 
+router.get("/:id", async (req, res) => {
+  const find = await Order.find({_id : req.params.id})
+  console.log(find.user);
+})
+
 router.post("/", async (req, res) => {
   const { userId, packageId } = req.body;
 
