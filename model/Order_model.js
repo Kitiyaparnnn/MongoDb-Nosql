@@ -4,7 +4,7 @@ const PackagesData = require("./Package_model");
 
 //array shopping
 const OrdersSchema = mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  user: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   packages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Package" }],
 },{collection: 'orders'});
 
