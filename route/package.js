@@ -42,51 +42,50 @@ router.get("/:id", async (req, res) => {
       ranges,
     });
   } else if (req.params.id === "filter") {
-    // let packageType = req.query.packageType,
-    //   internetType = req.query.internetType,
-    //   internetSpeedType = req.query.internetSpeedType,
-    //   minFee = req.query.minFee,
-    //   maxFee = req.query.maxFee,
-    //   minFreeCall = req.query.minFreeCall,
-    //   maxFreeCall = req.query.maxFreeCall,
-    //   minData = req.query.minData,
-    //   maxData = req.query.maxData,
-    //   minSpeed = req.query.minSpeed,
-    //   maxSpeed = req.query.maxSpeed,
-    //   minDuration = req.query.minDuration,
-    //   maxDuration = req.query.maxDuration,
-    //   isMNP = req.query.isMNP,
-    //   range = req.query.range;
+    let packageType = req.query.packageType,
+      internetType = req.query.internetType,
+      internetSpeedType = req.query.internetSpeedType,
+      minFee = req.query.minFee,
+      maxFee = req.query.maxFee,
+      minFreeCall = req.query.minFreeCall,
+      maxFreeCall = req.query.maxFreeCall,
+      minData = req.query.minData,
+      maxData = req.query.maxData,
+      minSpeed = req.query.minSpeed,
+      maxSpeed = req.query.maxSpeed,
+      minDuration = req.query.minDuration,
+      maxDuration = req.query.maxDuration,
+      isMNP = req.query.isMNP,
+      range = req.query.range;
 
-    let {packageType ,
-    internetType ,
-    internetSpeedType ,
-    minFee ,
-    maxFee,
-    minFreeCall ,
-    maxFreeCall ,
-    minData ,
-    maxData ,
-    minSpeed ,
-    maxSpeed,
-    minDuration ,
-    maxDuration ,
-    isMNP,
-    range} = req.params
-    
-    console.log(req.params);
-    
+    // let {packageType ,
+    // internetType ,
+    // internetSpeedType ,
+    // minFee ,
+    // maxFee,
+    // minFreeCall ,
+    // maxFreeCall ,
+    // minData ,
+    // maxData ,
+    // minSpeed ,
+    // maxSpeed,
+    // minDuration ,
+    // maxDuration ,
+    // isMNP,
+    // range} = req.params
 
-    if (packageType == '') packageType = "Post Paid";
-    if (internetSpeedType == '') internetSpeedType = "Full Speed";
-    if (minFreeCall == '') minFreeCall = 0;
-    if (maxFreeCall =='') maxFreeCall = 800;
-    if (minDuration == '') minDuration = 1;
-    if (maxDuration == '') maxDuration = 60;
-    if (maxData == '') maxData = 1000;
-    if (isMNP == '') isMNP = false;
-    if (range == '') range = 10;
-console.log(range);
+    // console.log(req.params);
+
+    if (packageType == "") packageType = "Post Paid";
+    if (internetSpeedType == "") internetSpeedType = "Full Speed";
+    if (minFreeCall == "") minFreeCall = 0;
+    if (maxFreeCall == "") maxFreeCall = 800;
+    if (minDuration == "") minDuration = 1;
+    if (maxDuration == "") maxDuration = 60;
+    if (maxData == "") maxData = 1000;
+    if (isMNP == "") isMNP = false;
+    if (range == "") range = 10;
+    // console.log(range);
     if (packageType === "Post Paid") {
       if (internetType == undefined) internetType = "5G";
       if (minFee == undefined) minFee = 250;
