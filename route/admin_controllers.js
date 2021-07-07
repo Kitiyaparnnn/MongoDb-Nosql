@@ -1,7 +1,8 @@
+require("dotenv/config");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Admin = require("../model/Admin_model");
-const SECRET_KEY = 'RESTFULAPIs'
+// const process.env.SECRET_KEY = 'RESTFULAPIs'
 
 exports.register = async (req, res) => {
   if (req.body.password.length < 8)
@@ -27,6 +28,7 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+  //input email & password
   await Admin.findOne(
     {
       email: req.body.email,
@@ -43,7 +45,7 @@ exports.login = async (req, res) => {
         message: "Login success",
         token: jwt.sign(
           { email: admin.email, fullName: admin.fullName, _id: admin._id },
-          SECRET_KEY
+          process.env.SECRET_KEY
         ),
       });
     }
@@ -52,7 +54,7 @@ exports.login = async (req, res) => {
 
 exports.loginRequired = (req, res, next) => {
   if (req.headers && req.headers.authorization) {
-    jwt.verify(req.headers.authorization, SECRET_KEY, (err, decode) => {
+    jwt.verify(req.headers.authorization, process.env.SECRET_KEY, (err, decode) => {
       if (err) req.Admin = undefined;
       req.Admin = decode;
       next();
@@ -64,7 +66,8 @@ exports.loginRequired = (req, res, next) => {
 };
 
 exports.profile = async (req, res) => {
-  //show admin acount
+  //inputheader Authentication=token
+  //show admin acount w/ password
   if (req.Admin) {
     return await res.send(req.Admin);
   } else {

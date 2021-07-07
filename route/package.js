@@ -42,89 +42,121 @@ router.get("/:id", async (req, res) => {
       ranges,
     });
   } else if (req.params.id === "filter") {
-    let packageType = req.query.packageType,
-      internetType = req.query.internetType,
-      internetSpeedType = req.query.internetSpeedType,
-      minFee = req.query.minFee,
-      maxFee = req.query.maxFee,
-      minFreeCall = req.query.minFreeCall,
-      maxFreeCall = req.query.maxFreeCall,
-      minData = req.query.minData,
-      maxData = req.query.maxData,
-      minSpeed = req.query.minSpeed,
-      maxSpeed = req.query.maxSpeed,
-      minDuration = req.query.minDuration,
-      maxDuration = req.query.maxDuration,
-      isMNP = req.query.isMNP,
-      range = req.query.range;
+    try {
+      let packageType = req.query.packageType,
+        internetType = req.query.internetType,
+        internetSpeedType = req.query.internetSpeedType,
+        minFee = req.query.minFee,
+        maxFee = req.query.maxFee,
+        minFreeCall = req.query.minFreeCall,
+        maxFreeCall = req.query.maxFreeCall,
+        minData = req.query.minData,
+        maxData = req.query.maxData,
+        minSpeed = req.query.minSpeed,
+        maxSpeed = req.query.maxSpeed,
+        minDuration = req.query.minDuration,
+        maxDuration = req.query.maxDuration,
+        isMNP = req.query.isMNP,
+        range = req.query.range;
 
-    // let {packageType ,
-    // internetType ,
-    // internetSpeedType ,
-    // minFee ,
-    // maxFee,
-    // minFreeCall ,
-    // maxFreeCall ,
-    // minData ,
-    // maxData ,
-    // minSpeed ,
-    // maxSpeed,
-    // minDuration ,
-    // maxDuration ,
-    // isMNP,
-    // range} = req.params
+      if (packageType == "") packageType = "Post Paid";
+      if (internetSpeedType == "") internetSpeedType = "Full Speed";
+      if (minFreeCall == "") minFreeCall = 0;
+      if (maxFreeCall == "") maxFreeCall = 800;
+      if (minDuration == "") minDuration = 1;
+      if (maxDuration == "") maxDuration = 60;
+      if (maxData == "") maxData = 1000;
+      if (isMNP == "") isMNP = false;
+      if (range == "") range = 10;
+      // console.log(range);
+      if (packageType === "Post Paid") {
+        if (internetType == undefined) internetType = "5G";
+        if (minFee == undefined) minFee = 250;
+        if (maxFee == undefined) maxFee = 1400;
+        if (minData == undefined) minData = 1.5;
 
-    // console.log(req.params);
-
-    if (packageType == "") packageType = "Post Paid";
-    if (internetSpeedType == "") internetSpeedType = "Full Speed";
-    if (minFreeCall == "") minFreeCall = 0;
-    if (maxFreeCall == "") maxFreeCall = 800;
-    if (minDuration == "") minDuration = 1;
-    if (maxDuration == "") maxDuration = 60;
-    if (maxData == "") maxData = 1000;
-    if (isMNP == "") isMNP = false;
-    if (range == "") range = 10;
-    // console.log(range);
-    if (packageType === "Post Paid") {
-      if (internetType == undefined) internetType = "5G";
-      if (minFee == undefined) minFee = 250;
-      if (maxFee == undefined) maxFee = 1400;
-      if (minData == undefined) minData = 1.5;
-
-      if (internetSpeedType === "Fixed Speed") {
-        if (minSpeed == undefined) minSpeed = 1.5;
-        if (maxSpeed == undefined) maxSpeed = 1000;
-        minData = minSpeed;
-        maxData = maxSpeed;
+        if (internetSpeedType === "Fixed Speed") {
+          if (minSpeed == undefined) minSpeed = 1.5;
+          if (maxSpeed == undefined) maxSpeed = 1000;
+          minData = minSpeed;
+          maxData = maxSpeed;
+        }
+        if (!isMNP) {
+          console.log("MNP process");
+          const MNP = await Package.find(
+            { name: /(MNP)/i },
+            {
+              name: 1,
+              internet_type: 1,
+              price: 1,
+              calltime: 1,
+              internet_speed: 1,
+            }
+          ).sort({ price: 1 });
+          return res.json({
+            success: true,
+            messages: "bestlist has " + MNP.length,
+            packages: MNP,
+          });
+        } else {
+          console.log("post paid process");
+          await Package.find(
+            {
+              package_type: packageType,
+              internet_type: internetType,
+              price: { $gte: minFee, $lte: maxFee },
+              calltime: {
+                $gte: minFreeCall,
+                $lte: maxFreeCall,
+              },
+              internet_speed: {
+                $gte: minData,
+                $lte: maxData,
+              },
+            },
+            {
+              name: 1,
+              internet_type: 1,
+              price: 1,
+              calltime: 1,
+              internet_speed: 1,
+            },
+            (err, data) => {
+              if (err)
+                return res.json({
+                  success: false,
+                  message: "Please select all package option",
+                  error: err,
+                });
+              else {
+              }
+              return res.json({
+                success: true,
+                messages: "bestlist has " + data.length,
+                packages: data,
+              });
+            }
+          )
+            .sort({ internet_speed: 1, price: 1, name: 1, calltime: -1 })
+            .limit(parseInt(range));
+          // .skip({name : /(MNP)/i});
+        }
       }
-      if (!isMNP) {
-        console.log("MNP process");
-        const MNP = await Package.find(
-          { name: /(MNP)/i },
-          {
-            name: 1,
-            internet_type: 1,
-            price: 1,
-            calltime: 1,
-            internet_speed: 1,
-          }
-        ).sort({ price: 1 });
-        return res.json({
-          success: true,
-          messages: "bestlist has " + MNP.length,
-          packages: MNP,
-        });
-      } else {
-        console.log("post paid process");
+
+      if (packageType === "Pre Paid") {
+        if (internetType == undefined) internetType = "4G";
+        if (minFee == undefined) minFee = 19;
+        if (maxFee == undefined) maxFee = 600;
+        if (minData == undefined) minData = 1;
+        console.log("pre paud process");
         await Package.find(
           {
             package_type: packageType,
             internet_type: internetType,
             price: { $gte: minFee, $lte: maxFee },
             calltime: {
-              $gte: minFreeCall,
-              $lte: maxFreeCall,
+              $gte: minDuration,
+              $lte: maxDuration,
             },
             internet_speed: {
               $gte: minData,
@@ -145,59 +177,19 @@ router.get("/:id", async (req, res) => {
                 message: "Please select all package option",
                 error: err,
               });
-            else {
-            }
-            return res.json({
-              success: true,
-              messages: "bestlist has " + data.length,
-              packages: data,
-            });
+            else
+              return res.json({
+                success: true,
+                messages: "bestlist has " + data.length,
+                packages: data,
+              });
           }
         )
-          .sort({ internet_speed: 1, price: 1, name: 1, calltime: -1 })
-          .limit(parseInt(range));
-        // .skip({name : /(MNP)/i});
+          .sort({ calltime: 1, internet_speed: -1, price: -1 })
+          .limit(range);
       }
-    }
-
-    if (packageType === "Pre Paid") {
-      if (internetType == undefined) internetType = "4G";
-      if (minFee == undefined) minFee = 19;
-      if (maxFee == undefined) maxFee = 600;
-      if (minData == undefined) minData = 1;
-      console.log("pre paud process");
-      await Package.find(
-        {
-          package_type: packageType,
-          internet_type: internetType,
-          price: { $gte: minFee, $lte: maxFee },
-          calltime: {
-            $gte: minDuration,
-            $lte: maxDuration,
-          },
-          internet_speed: {
-            $gte: minData,
-            $lte: maxData,
-          },
-        },
-        { name: 1, internet_type: 1, price: 1, calltime: 1, internet_speed: 1 },
-        (err, data) => {
-          if (err)
-            return res.json({
-              success: false,
-              message: "Please select all package option",
-              error: err,
-            });
-          else
-            return res.json({
-              success: true,
-              messages: "bestlist has " + data.length,
-              packages: data,
-            });
-        }
-      )
-        .sort({ calltime: 1, internet_speed: -1, price: -1 })
-        .limit(range);
+    } catch (err) {
+      res.json({ message: "Not enough information" });
     }
   } else {
     Package.findById(

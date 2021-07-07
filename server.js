@@ -16,9 +16,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 //Connect to database
-const db =
-  "mongodb+srv://me123:me123@cluster0.xhvfg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(process.env.MOGODB_URI || db, {
+mongoose.connect(process.env.MOGODB_URI , {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
@@ -31,15 +29,20 @@ mongoose.connection.on(
 );
 mongoose.connection.once("open", function () {
   console.log("connected to db");
-//   app.use(function (req, res, next) {
+  // app.use(function (req, res, next) {
 
-//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-//     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-//     res.setHeader('Access-Control-Allow-Credentials', true);
-
-//     next();
-// });
+  //   var allowedDomains = ['http://localhost:3001','http://localhost:8080' ];
+  //   var origin = req.headers.origin;
+  //   if(allowedDomains.indexOf(origin) > -1){
+  //     res.setHeader('Access-Control-Allow-Origin', origin);
+  //   }
+  
+  //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  //   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Accept');
+  //   res.setHeader('Access-Control-Allow-Credentials', true);
+  
+  //   next();
+  // })
 
   //First page
   app.get("/", (req, res) => {
@@ -69,7 +72,7 @@ mongoose.connection.once("open", function () {
     res.status(404).send({ url: req.originalUrl + " not found" });
   });
 
-  const PORT = process.env.PORT || 3001;
+  const PORT = process.env.PORT ;
   app.listen(PORT, function () {
     return console.log("Running server on port " + PORT);
   });
