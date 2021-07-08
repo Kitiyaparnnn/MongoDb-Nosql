@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Package = require("../model/Package_model");
+require("dotenv/config");
 
 router.get("/", (req, res) => {
   Package.find({}, { moreDetials: 0 }, (err, data) => {
@@ -59,6 +60,7 @@ router.get("/:id", async (req, res) => {
         isMNP = req.query.isMNP,
         range = req.query.range;
 
+        console.log(req.query);
       if (packageType == "") packageType = "Post Paid";
       if (internetSpeedType == "") internetSpeedType = "Full Speed";
       if (minFreeCall == "") minFreeCall = 0;
@@ -70,14 +72,14 @@ router.get("/:id", async (req, res) => {
       if (range == "") range = 10;
       // console.log(range);
       if (packageType === "Post Paid") {
-        if (internetType == undefined) internetType = "5G";
-        if (minFee == undefined) minFee = 250;
-        if (maxFee == undefined) maxFee = 1400;
-        if (minData == undefined) minData = 1.5;
+        if (internetType == "") internetType = "5G";
+        if (minFee == "") minFee = 250;
+        if (maxFee == "") maxFee = 1400;
+        if (minData == "") minData = 1.5;
 
         if (internetSpeedType === "Fixed Speed") {
-          if (minSpeed == undefined) minSpeed = 1.5;
-          if (maxSpeed == undefined) maxSpeed = 1000;
+          if (minSpeed == "") minSpeed = 1.5;
+          if (maxSpeed == "") maxSpeed = 1000;
           minData = minSpeed;
           maxData = maxSpeed;
         }
@@ -144,11 +146,11 @@ router.get("/:id", async (req, res) => {
       }
 
       if (packageType === "Pre Paid") {
-        if (internetType == undefined) internetType = "4G";
-        if (minFee == undefined) minFee = 19;
-        if (maxFee == undefined) maxFee = 600;
-        if (minData == undefined) minData = 1;
-        console.log("pre paud process");
+        if (internetType == "") internetType = "4G";
+        if (minFee == "") minFee = 19;
+        if (maxFee == "") maxFee = 600;
+        if (minData == "") minData = 1;
+        console.log("pre paid process");
         await Package.find(
           {
             package_type: packageType,
