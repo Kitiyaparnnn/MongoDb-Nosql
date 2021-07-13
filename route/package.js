@@ -16,70 +16,89 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+
+  let prepaid_minFee = parseInt(process.env.prepaid_minFee)
+  let prepaid_maxFee = parseInt(process.env.prepaid_maxFee)
+  let prepaid_minData = parseInt(process.env.prepaid_minData)
+  let prepaid_maxData = parseInt(process.env.prepaid_maxData)
+  let prepaid_minDuration = parseInt(process.env.prepaid_minDuration)
+  let prepaid_maxDuration = parseInt(process.env.prepaid_maxDuration)
+
+  let postpaid_minFee = parseInt(process.env.postpaid_minFee)
+  let postpaid_maxFee = parseInt(process.env.postpaid_maxFee)
+  let postpaid_minFreeCall = +process.env.postpaid_minFreeCall
+  let postpaid_maxFreeCall = parseInt(process.env.postpaid_maxFreeCall)
+  let postpaid_minData = parseInt(process.env.postpaid_minData)
+  let postpaid_maxData = parseInt(process.env.postpaid_maxData)
+  let postpaid_minSpeed = parseInt(process.env.postpaid_minSpeed)
+  let postpaid_maxSpeed = parseInt(process.env.postpaid_maxSpeed)
+  let p_range = parseInt(process.env.range)
+
   if (req.params.id === "ranges") {
     const ranges = {
       prepaid: {
-        minFee: 19,
-        maxFee: 600,
-        minData: 1,
-        maxData: 1000,
-        minDuration: 1,
-        maxDuration: 60,
+        minFee: prepaid_minFee,
+        maxFee: prepaid_maxFee,
+        minData: prepaid_minData,
+        maxData: prepaid_maxData,
+        minDuration: prepaid_minDuration,
+        maxDuration: prepaid_maxDuration,
       },
       postpaid: {
-        minFee: 250,
-        maxFee: 1400,
-        minFreeCall: 0,
-        maxFreeCall: 800,
-        minData: 1.5,
-        maxData: 1000,
-        minSpeed: 1.5,
-        maxSpeed: 1000,
+        minFee: postpaid_minFee,
+        maxFee: postpaid_maxFee,
+        minFreeCall: postpaid_minFreeCall,
+        maxFreeCall: postpaid_maxFreeCall,
+        minData: postpaid_minData,
+        maxData: postpaid_maxData,
+        minSpeed: postpaid_minSpeed,
+        maxSpeed: postpaid_maxSpeed,
       },
+      range: p_range
     };
-
+    // console.log(ranges);
     return res.json({
       messages: "maxData,maxSpeed 1000 = unlimited",
       ranges,
     });
   } else if (req.params.id === "filter") {
-    try {
+    // try {
       let packageType = req.query.packageType,
         internetType = req.query.internetType,
         internetSpeedType = req.query.internetSpeedType,
-        minFee = req.query.minFee,
-        maxFee = req.query.maxFee,
-        minFreeCall = req.query.minFreeCall,
-        maxFreeCall = req.query.maxFreeCall,
-        minData = req.query.minData,
-        maxData = req.query.maxData,
-        minSpeed = req.query.minSpeed,
-        maxSpeed = req.query.maxSpeed,
-        minDuration = req.query.minDuration,
-        maxDuration = req.query.maxDuration,
+        minFee = +req.query.minFee,
+        maxFee = +req.query.maxFee,
+        minFreeCall = +req.query.minFreeCall,
+        maxFreeCall = +req.query.maxFreeCall,
+        minData = +req.query.minData,
+        maxData = +req.query.maxData,
+        minSpeed = +req.query.minSpeed,
+        maxSpeed = +req.query.maxSpeed,
+        minDuration = +req.query.minDuration,
+        maxDuration = +req.query.maxDuration,
         isMNP = req.query.isMNP,
-        range = req.query.range;
+        range = +req.query.range;
 
         console.log(req.query);
-      if (packageType == "") packageType = "Post Paid";
-      if (internetSpeedType == "") internetSpeedType = "Full Speed";
-      if (minFreeCall == "") minFreeCall = 0;
-      if (maxFreeCall == "") maxFreeCall = 800;
-      if (minDuration == "") minDuration = 1;
-      if (maxDuration == "") maxDuration = 60;
-      if (maxData == "") maxData = 1000;
-      if (isMNP == "") isMNP = false;
-      if (range == "") range = 10;
+      if (packageType == "") packageType = process.env.packageType;
+      if (internetSpeedType == "") internetSpeedType = process.env.internetSpeedType;
+      if (minFreeCall == "") minFreeCall = postpaid_minFreeCall
+      if (maxFreeCall == "") maxFreeCall = postpaid_maxFreeCall
+      if (minDuration == "") minDuration = prepaid_minDuration;
+      if (maxDuration == "") maxDuration = prepaid_maxDuration;
+      if (maxData == "") maxData = postpaid_maxData;
+      if (isMNP == "") isMNP = process.env.isMNP;
+      if (range == "") range = p_range;
       // console.log(range);
       if (packageType === "Post Paid") {
-        if (internetType == "") internetType = "5G";
-        if (minFee == "") minFee = 250;
-        if (maxFee == "") maxFee = 1400;
-        if (minData == "") minData = 1.5;
+        if (internetType == "") internetType = process.env.postpaid_internetType;
+        if (minFee == "") minFee = postpaid_minFee;
+        if (maxFee == "") maxFee = postpaid_maxFee;
+        if (minData == "") minData = postpaid_minData;
 
         if (internetSpeedType === "Fixed Speed") {
-          if (minSpeed == "") minSpeed = 1.5;
-          if (maxSpeed == "") maxSpeed = 1000;
+          if (minSpeed == "") minSpeed = postpaid_minData
+          if (maxSpeed == "") maxSpeed = postpaid_maxData;
           minData = minSpeed;
           maxData = maxSpeed;
         }
@@ -97,7 +116,7 @@ router.get("/:id", async (req, res) => {
           ).sort({ price: 1 });
           return res.json({
             success: true,
-            messages: "bestlist has " + MNP.length,
+            messages: "The resault has " + MNP.length,
             packages: MNP,
           });
         } else {
@@ -127,14 +146,14 @@ router.get("/:id", async (req, res) => {
               if (err)
                 return res.json({
                   success: false,
-                  message: "Please select all package option",
+                  message: "Please select all package detials filter",
                   error: err,
                 });
               else {
               }
               return res.json({
                 success: true,
-                messages: "bestlist has " + data.length,
+                messages: "The resault has " + data.length,
                 packages: data,
               });
             }
@@ -146,11 +165,12 @@ router.get("/:id", async (req, res) => {
       }
 
       if (packageType === "Pre Paid") {
-        if (internetType == "") internetType = "4G";
-        if (minFee == "") minFee = 19;
-        if (maxFee == "") maxFee = 600;
-        if (minData == "") minData = 1;
+        if (internetType == "") internetType = process.env.prepaid_internetType;
+        if (minFee == "") minFee = prepaid_minFee;
+        if (maxFee == "") maxFee = prepaid_maxFee;
+        if (minData == "") minData = prepaid_minData;
         console.log("pre paid process");
+
         await Package.find(
           {
             package_type: packageType,
@@ -176,13 +196,13 @@ router.get("/:id", async (req, res) => {
             if (err)
               return res.json({
                 success: false,
-                message: "Please select all package option",
+                message: "Please select all package detials filter",
                 error: err,
               });
             else
               return res.json({
                 success: true,
-                messages: "bestlist has " + data.length,
+                messages: "The resault has " + data.length,
                 packages: data,
               });
           }
@@ -190,9 +210,9 @@ router.get("/:id", async (req, res) => {
           .sort({ calltime: 1, internet_speed: -1, price: -1 })
           .limit(range);
       }
-    } catch (err) {
-      res.json({ message: "Not enough information" });
-    }
+    // } catch (err) {
+    //   res.json({ message: "Not enough information",err});
+    // }
   } else {
     Package.findById(
       { _id: req.params.id },

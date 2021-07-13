@@ -1,4 +1,4 @@
-require("dotenv/config");
+require("dotenv");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");

@@ -11,7 +11,14 @@ const UserSchema = mongoose.Schema({
     province: { type: String, required: true },
     postcode: { type: Number, required: true },
   },
-  phoneNumber: { type: Number, required: [true, "What is your contact number?"] },
+  addressDelivery: {
+    houseNo: { type: String, required: true },
+    subdistrict: { type: String, required: true },
+    district: { type: String, required: true },
+    province: { type: String, required: true },
+    postcode: { type: Number, required: true },
+  },
+  phoneNumber: [{ type: Number, required: [true, "What is your contact number?"] }],
   email: { type: String, required: true },
   university: { 
     name: {type: String ,default:''},
