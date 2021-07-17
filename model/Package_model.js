@@ -11,7 +11,8 @@ const PackageSchema = mongoose.Schema({
         description:[{type:String}],
         wifi:String, 
         morebenefit:[{type:String}]
-    }
+    },
+    date : {type: Date, default : Date.now}
 })
 
 

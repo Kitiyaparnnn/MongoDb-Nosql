@@ -4,10 +4,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
 const packageRoute = require("./route/package");
-const userRoute = require("./route/user");
+const customerRoute = require("./route/customer");
 const adminRoute = require("./route/admin");
 const orderRoute = require("./route/order");
-const image = require("./route/Image")
+const image = require("./route/Image");
+const Grid = require("gridfs-stream");
 
 const app = express();
 app.use(cors());
@@ -16,12 +17,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 //Connect to database
-mongoose.connect(process.env.MOGODB_URI , {
+const connection = () => mongoose.connect(process.env.MOGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
   useFindAndModify: false,
 });
+
+connection()
 
 mongoose.connection.on(
   "error",
@@ -36,11 +39,11 @@ mongoose.connection.once("open", function () {
   //   if(allowedDomains.indexOf(origin) > -1){
   //     res.setHeader('Access-Control-Allow-Origin', origin);
   //   }
-  
+
   //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   //   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Accept');
   //   res.setHeader('Access-Control-Allow-Credentials', true);
-  
+
   //   next();
   // })
 
@@ -53,8 +56,8 @@ mongoose.connection.once("open", function () {
   //Package Part
   app.use("/packages", packageRoute);
 
-  //User Part
-  app.use("/customers", userRoute);
+  //Customer Part
+  app.use("/customers", customerRoute);
 
   //Admin Part
   app.use("/admins", adminRoute);
@@ -63,7 +66,7 @@ mongoose.connection.once("open", function () {
   app.use("/orders", orderRoute);
 
   //test image upload
-  app.use("/image",image)
+  app.use("/image", image);
 
   //View engines
   // app.set("view engine", "ejs");
@@ -72,7 +75,7 @@ mongoose.connection.once("open", function () {
     res.status(404).send({ url: req.originalUrl + " not found" });
   });
 
-  const PORT = process.env.PORT ;
+  const PORT = process.env.PORT || 3001;
   app.listen(PORT, function () {
     return console.log("Running server on port " + PORT);
   });

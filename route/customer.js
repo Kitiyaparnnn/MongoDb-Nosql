@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../model/User_model");
+const User = require("../model/Customer_model");
 const multer = require("multer");
 var fs = require("fs");
 var path = require("path");
@@ -50,8 +50,16 @@ router.post("/", multiUploads, (req, res) => {
     lastname,
     birthday,
     nationalId,
-   address,
-   addressDelivery,
+    houseNo,
+    subdistrict,
+    district,
+    province,
+    postcode,
+    houseNo_c,
+    subdistrict_c,
+    district_c,
+    province_c,
+    postcode_c,
     phoneNumber,
     email,
     university,
@@ -60,20 +68,32 @@ router.post("/", multiUploads, (req, res) => {
   if (nationalId.length != 13) {
     return res.json({
       success: false,
-      message: "nationalId must have 13 digits",
+      message: "NationalId must have 13 digits",
     });
   }
 
-  if (phoneNumber.length < 9 || phoneNumber.length > 10) {
-    return res.json({ success: false, message: "mobile is not valid" });
+  if (phoneNumber.length < 10 || phoneNumber.length > 10) {
+    return res.json({ success: false, message: "PhoneNumber is not valid" });
   }
 
   const newuser = {
     name: firstname + " " + lastname,
     birthday,
     nationalId,
-    address,
-    addressDelivery,
+    address:{ 
+      houseNo : houseNo,
+      subdistrict :subdistrict,
+      district : district,
+      province : province,
+      postcode : postcode,
+     },
+    addressDelivery : { 
+      houseNo : houseNo_c,
+      subdistrict :subdistrict_c,
+      district : district_c,
+      province : province_c,
+      postcode : postcode_c,
+    },
     phoneNumber,
     email,
     university,
