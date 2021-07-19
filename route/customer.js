@@ -155,10 +155,13 @@ router.post("/", multiUploads, (req, res) => {
 
   // console.log(req.files.univImage);
 else{
-  const faceUrl = `http://localhost:${process.env.PORT}/customers/faceImage/${req.files.faceImage[0].originalname}`,
-    citizenUrl = `http://localhost:${process.env.PORT}/customers/citizenImage/${req.files.citizenImage[0].originalname}`,
-    univUrl = `http://localhost:${process.env.PORT}/customers/univImage/${req.files.univImage[0].originalname}`;  
+  // const faceUrl = `http://localhost:${process.env.PORT}/customers/faceImage/${req.files.faceImage[0].originalname}`,
+  //   citizenUrl = `http://localhost:${process.env.PORT}/customers/citizenImage/${req.files.citizenImage[0].originalname}`,
+  //   univUrl = `http://localhost:${process.env.PORT}/customers/univImage/${req.files.univImage[0].originalname}`;  
 
+  const faceUrl = `https://project-true.herokuapp.com/customers/faceImage/${req.files.faceImage[0].originalname}`;
+  const citizenUrl = `https://project-true.herokuapp.com/customers/citizenImage/${req.files.citizenImage[0].originalname}`;
+  const univUrl = `https://project-true.herokuapp.com/customers/univImage/${req.files.univImage[0].originalname}`;
   console.log(faceUrl);
   console.log(citizenUrl);
   console.log(univUrl);
