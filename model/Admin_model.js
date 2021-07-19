@@ -2,7 +2,7 @@ const mongoose = require('mongoose'),
   bcrypt = require('bcryptjs'),
   Schema = mongoose.Schema;
 
-
+//header admin
 const AdminSchema = new Schema({
   fullName: {
     type: String,

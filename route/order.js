@@ -5,27 +5,57 @@ const Package = require("../model/Package_model");
 const Order = require("../model/Order_model");
 
 router.get("/", async (req, res) => {
-  await Order.find({}, (err, orders) => {
-    if (err){
-       return res.json({ success: false,err });
+  await Order.find({}, {}, (err, orders) => {
+    if (err) {
+      return res.json({ success: false, err });
     }
-    if (orders.length == 0){
-         return res.json({ success: true, message: "Empty order" });
+    if (orders.length == 0) {
+      return res.json({ success: true, message: "Empty order" });
     }
-   
-    // console.log(orders.user);
+    console.log(orders.user);
     return res.json({
       success: true,
       message: "there is " + orders.length + " orders",
       orders,
     });
-  }).populate("user packages", "name -id");
+  });
+  // .populate("user packages", "name -id");
 });
 
-// router.get("/:id", async (req, res) => {
-//   const find = await Order.find({ _id: req.params.id });
-//   console.log(find.user);
-// });
+//Get by Id
+router.get("/:id", async (req, res) => {
+  await Order.findOne({ _id: req.params.id }, async (err, find) => {
+    if(err) return res.json({ success: false, error: err })
+    console.log(find.user, find.packages);
+    const userData = await User.findById(
+      { _id: find.user },
+      { _id: 1, name: 1, phoneNumber: 1, addressDelivery: 1 }
+    );
+    const packagesData = await Package.findById(
+      { _id: find.packages[0] },
+      { _id: 1, name: 1 }
+    );
+    return res.json({ success: true, userData, packagesData})
+  });
+});
+
+//Get by Date
+router.get("/:date", async (req, res) => {
+  console.log(new Date());
+  // await Order.findOne({ date: {$gte : new Date(req.params.date) }}, async (err, find) => {
+  //   if(err) return res.json({ success: false, error: err })
+  //   console.log(find.user, find.packages);
+  //   const userData = await User.findById(
+  //     { _id: find.user },
+  //     { _id: 1, name: 1, phoneNumber1: 1, phoneNumber2: 1, addressDelivery: 1 }
+  //   );
+  //   const packagesData = await Package.findById(
+  //     { _id: find.packages[0] },
+  //     { _id: 1, name: 1 }
+  //   );
+  //   return res.json({ success: true, userData, packagesData})
+  // });
+});
 
 router.post("/", async (req, res) => {
   const { userId, packageId } = req.body;
@@ -44,8 +74,6 @@ router.post("/", async (req, res) => {
     {
       name: 1,
       nationalId: 1,
-      address: 1,
-      phoneNumber: 1,
     }
   );
 

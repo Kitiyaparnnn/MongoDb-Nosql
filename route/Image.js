@@ -11,55 +11,25 @@ const Grid = require("gridfs-stream");
 // const mongodb = require('mongodb');
 // const GridFSBucket = mongodb.GridFSBucket;
 
-let gfs,gfss,gridBucket;
+let gfs, gfss, gkProfile, gkCard;
 mongoose.connection.once("open", function () {
-  // gridBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db,{bucketName : images})
-  // gfs = Grid(mongoose.connection.db)
-  // gfs.collection("images")
+  /*GridBucket*/
+  // gkProfile = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+  //   bucketName: "profile",
+  // });
+  // gkCard = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+  //   bucketName: "card",
+  // });
   
-  // gfs = new GridFSBucket(mongoose.connection.db,{bucketName: 'profile'});
+  /*Grid*/
   gfs = Grid(mongoose.connection.db,mongoose.mongo)
   gfs.collection("profile");
-  // gfss = new GridFSBucket(mongoose.connection.db, {bucketName: 'card'});
+  
   gfss = Grid(mongoose.connection.db,mongoose.mongo)
   gfss.collection("card");
+  
 });
 
-router.get("/profile/:filename", async (req, res) => {
-  try {
-    const file = await gfs.files.findOne({ filename: req.params.filename });
-    const readStream = gfs.createReadStream(file.filename);
-    // const readStream = gfs.openDownloadStreamByName(file.filename);
-    readStream.pipe(res);
-  } catch (error) {
-    res.send("not found");
-  }
-});
-
-router.get("/card/:filename", async (req, res) => {
-  try {
-    const file = await gfss.files.findOne({ filename: req.params.filename });
-    const readStream = gfss.createReadStream(file.filename);
-    readStream.pipe(res);
-  } catch (error) {
-    res.send("not found");
-  }
-});
-
-/**Original multer*/
-// var storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     // cb(null, path.join(__dirname, '/uploads/'));
-//     if (file.fieldname === "profile") cb(null, path.join("./images/profile/"));
-//     if (file.fieldname === "card") cb(null, path.join("./images/card/"));
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
-//     cb(null, file.originalname);
-//   },
-// });
-
-/*GridFsStorage data:buffer -> object*/
 const storage = new GridFsStorage({
   url: process.env.MOGODB_URI,
   options: { useNewUrlParser: true, useUnifiedTopology: true },
@@ -84,31 +54,85 @@ var upload = multer({ storage: storage }).fields([
 const ImageSchema = new Schema({
   profile: {
     link: String,
-    data : Object,
+    data: Object,
   },
   card: {
     link: String,
-    data : Object,
+    data: Object,
   },
 });
 const Image = mongoose.model("Image", ImageSchema);
+
+router.get("/profile/:filename", async (req, res) => {
+  try {
+    // const file = await gkProfile.files.openDownloadStreamByName(
+    //   req.params.filename
+    // );
+    // const readStream = gkProfile.createWriteStream(file.filename);
+
+    /*Grid*/
+    const file = await gfs.files.findOne({ filename: req.params.filename });
+    const readStream = gfs.createReadStream(file.filename);
+    readStream.pipe(res);
+  } catch (error) {
+    res.send("not found");
+  }
+});
+
+router.get("/card/:filename", async (req, res) => {
+  try {
+    // const file = await gkCard.files.openDownloadStreamByName(
+    //   req.params.filename
+    // ).pipe(res);
+    // console.log(file);
+    // const readStream = fs.createWriteStream(file.filename);
+
+    /*Grid*/
+    const file = await gfss.files.findOne({ filename: req.params.filename });
+    const readStream = gfss.createReadStream(file.filename);
+    readStream.pipe(res);
+  } catch (error) {
+    res.send("not found")
+  }
+});
+
+/**Original multer*/
+// var storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     // cb(null, path.join(__dirname, '/uploads/'));
+//     if (file.fieldname === "profile") cb(null, path.join("./images/profile/"));
+//     if (file.fieldname === "card") cb(null, path.join("./images/card/"));
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.originalname.substr(file.originalname.lastIndexOf("."));
+//     cb(null, file.originalname);
+//   },
+// });
+
+/*GridFsStorage data:buffer -> object*/
+
 
 router.post("/", upload, (req, res) => {
   if (req.files.profile == undefined || req.files.card == undefined) {
     return res.send("must select the files");
   }
-  const profileUrl = `http://${process.env.PORT}/image/profile/${req.files.profile[0].originalname}`,
-    cardUrl = `http://${process.env.PORT}/image/card/${req.files.card[0].originalname}`;
+  const profileUrl = `http://localhost:${process.env.PORT}/image/profile/${req.files.profile[0].originalname}`,
+    cardUrl = `http://localhost:${process.env.PORT}/image/card/${req.files.card[0].originalname}`;
   console.log(req.files.profile[0]);
   console.log(req.files.card[0]);
+
+
+  /*GridBucket*/
+  // gkProfile.openUploadStream(req.files.profile[0].originalname)
+  // gkCard.openUploadStream(req.files.card[0].originalname)
+
   const newImage = new Image();
 
   /*GridFsStorage*/
-  newImage.profile.link = profileUrl
+  newImage.profile.link = profileUrl;
   newImage.profile.data = req.files.profile[0];
-  newImage.card.link = cardUrl
+  newImage.card.link = cardUrl;
   newImage.card.data = req.files.card[0];
-
 
   /*Original*/
   // newImage.profile.data = req.files.profile
@@ -143,22 +167,22 @@ router.get("/", (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await Image.findByIdAndRemove({_id: req.params.id},(err,image) => {
-    try {      
+  await Image.findByIdAndRemove({ _id: req.params.id }, (err, image) => {
+    // console.log(image);
+    try {
       console.log(image.profile.data.filename);
       console.log(image.card.data.filename);
-       gfs.files.deleteOne({ filename: image.profile.data.filename });
+      gfs.files.deleteOne({ filename: image.profile.data.filename });
       //  gfs.chunks.delete({ filename: image.profile.data.filename})
-       gfss.files.deleteOne({ filename: image.card.data.filename });
+      gfss.files.deleteOne({ filename: image.card.data.filename });
       //  gfss.chunks.delete({ filename: image.card.data.filename})
 
       return res.send("success");
-  } catch (error) {
+    } catch (error) {
       console.log(error);
       return res.send("An error occured.");
-  }
-  })
-  
+    }
+  });
 });
 
 /*Original*/

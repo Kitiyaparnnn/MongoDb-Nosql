@@ -3,8 +3,9 @@ const router = express.Router();
 const Package = require("../model/Package_model");
 require("dotenv/config");
 
+
 router.get("/", (req, res) => {
-  Package.find({}, { moreDetials: 0 }, (err, data) => {
+  Package.find({}, {}, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     else {
       return res.json({

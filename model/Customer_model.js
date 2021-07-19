@@ -18,16 +18,18 @@ const UserSchema = mongoose.Schema({
     province: { type: String, required: true },
     postcode: { type: String, required: true },
   },
-  phoneNumber: [{ type: String, required: [true, "What is your contact number?"] }],
-  email: { type: String, required: true },
-  university: {type: String ,default:''},
-  photos: [
-    {
-      faceImage: { type: Buffer, required: true },
-      citizenImage: { type: Buffer, required: true },
-      univImage: { type: Buffer },
-    },
+  phoneNumber: [
+    { type: String, required: [true, "What is your contact number?"] },
   ],
+  email: { type: String, required: true },
+  university: { type: String, default: "" },
+  photos: 
+    {
+      faceImage: { link: String, data: Object },
+      citizenImage: { link: String, data: Object, default: "" },
+      univImage: { link: String, data: Object, default: "" },
+    },
+  
 });
 
 module.exports = mongoose.model("User", UserSchema);
