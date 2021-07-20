@@ -6,7 +6,7 @@ const PackagesData = require("./Package_model");
 const OrdersSchema = mongoose.Schema({
   user: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   packages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Package" }],
-  date : {type: Date , default: Date.now}
+  date : {type: Date , default: new Date()}
 },{collection: 'orders'});
 
 module.exports = mongoose.model("Order", OrdersSchema);

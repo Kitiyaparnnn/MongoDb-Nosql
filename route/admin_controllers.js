@@ -11,6 +11,7 @@ exports.register = async (req, res) => {
       message: "Password must be more than 8 characters",
     });
 
+  
   const newAdmin = new Admin(req.body);
   newAdmin.hash_password = bcrypt.hashSync(req.body.password, 10);
   await newAdmin.save((err, admin) => {

@@ -9,15 +9,15 @@ const Grid = require("gridfs-stream");
 const path = require("path");
 
 //GridFS process
-let gfsFace,gfsCitizen,gfsUniv;
-mongoose.connection.once("open",() => {
-  gfsFace = Grid(mongoose.connection.db,mongoose.mongo)
-  gfsFace.collection("FaceImage")
-  gfsCitizen = Grid(mongoose.connection.db,mongoose.mongo)
-  gfsCitizen.collection("CitizenImage")
-  gfsUniv = Grid(mongoose.connection.db,mongoose.mongo)
-  gfsUniv.collection("UnivImage")
-})
+let gfsFace, gfsIden, gfsStudent;
+mongoose.connection.once("open", () => {
+  gfsFace = Grid(mongoose.connection.db, mongoose.mongo);
+  gfsFace.collection("FaceImage");
+  gfsIden = Grid(mongoose.connection.db, mongoose.mongo);
+  gfsIden.collection("IdenImage");
+  gfsStudent = Grid(mongoose.connection.db, mongoose.mongo);
+  gfsStudent.collection("StudentImage");
+});
 
 const storage = new GridFsStorage({
   url: process.env.MOGODB_URI,
@@ -25,9 +25,9 @@ const storage = new GridFsStorage({
   file: (req, file) => {
     const filename = file.originalname;
     let bName;
-    if (file.fieldname === "faceImage") bName = "FaceImage";
-    if (file.fieldname === "citizenImage") bName = "CitizenImage";
-    if (file.fieldname === "univImage") bName = "UnivImage";
+    if (file.fieldname === "face") bName = "FaceImage";
+    if (file.fieldname === "identifier") bName = "IdenImage";
+    if (file.fieldname === "student") bName = "StudentImage";
     return {
       filename: filename,
       bucketName: bName,
@@ -54,9 +54,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 const multiUploads = upload.fields([
-  { name: "faceImage", maxCount: 1 },
-  { name: "citizenImage", maxCount: 1 },
-  { name: "univImage", maxCount: 1 },
+  { name: "face", maxCount: 1 },
+  { name: "identifier", maxCount: 1 },
+  { name: "student", maxCount: 1 },
 ]);
 
 router.get("/faceImage/:filename", async (req, res) => {
@@ -68,19 +68,23 @@ router.get("/faceImage/:filename", async (req, res) => {
     res.send("not found");
   }
 });
-router.get("/citizenImage/:filename", async (req, res) => {
+router.get("/identifierImage/:filename", async (req, res) => {
   try {
-    const file = await gfsCitizen.files.findOne({ filename: req.params.filename });
-    const readStream = gfsCitizen.createReadStream(file.filename);
+    const file = await gfsIden.files.findOne({
+      filename: req.params.filename,
+    });
+    const readStream = gfsIden.createReadStream(file.filename);
     readStream.pipe(res);
   } catch (error) {
     res.send("not found");
   }
 });
-router.get("/univImage/:filename", async (req, res) => {
+router.get("/studentImage/:filename", async (req, res) => {
   try {
-    const file = await gfsUniv.files.findOne({ filename: req.params.filename });
-    const readStream = gfsUniv.createReadStream(file.filename);
+    const file = await gfsStudent.files.findOne({
+      filename: req.params.filename,
+    });
+    const readStream = gfsStudent.createReadStream(file.filename);
     readStream.pipe(res);
   } catch (error) {
     res.send("not found");
@@ -106,105 +110,95 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", multiUploads, (req, res) => {
   const {
-    firstname,
-    lastname,
+    firstName,
+    lastName,
     birthday,
-    nationalId,
-    houseNo,
-    subdistrict,
-    district,
-    province,
-    postcode,
-    houseNo_c,
-    subdistrict_c,
-    district_c,
-    province_c,
-    postcode_c,
-    phoneNumber,
+    identifier,
+    permanentAddress,
+    deliveryAddress,
+    phone,
     email,
-    university,
+    institution,
   } = req.body;
-
-  if (nationalId.length != 13) {
-    return res.json({
-      success: false,
-      message: "NationalId must have 13 digits",
-    });
-  }
-
-  var check = 0
-  phoneNumber.forEach((phone) => {
-    if (phone.length != 10)
-      return check++;
-    return 0
+  const permanent = JSON.parse(permanentAddress);
+  const delivery = JSON.parse(deliveryAddress);
+  const phones = phone.replace(/ /g, "").split(",");
+  const emails = email.replace(/ /g, "").split(",");
+  console.log(phones);
+  // if (identifier.length != 13) {
+  //   return res.json({
+  //     success: false,
+  //     message: "identifier must have 13 digits",
+  //   });
+  // }
+  // console.log(req.body);
+  var check = 0;
+  phones.forEach((phones) => {
+    if (phones.length != 10) return check++;
+    return 0;
   });
-  if(check != 0){    
+  if (check != 0) {
     return res.json({
       success: false,
       message: "Phone number is invalid",
     });
   }
 
-  if (req.files.faceImage == undefined || req.files.citizenImage == undefined) {
+  if (req.files.face == undefined || req.files.identifier == undefined) {
     return res.send("must select the files");
   }
-  if(req.files.univImage == undefined){
+  if (req.files.student == undefined) {
     return res.send("if you are not a student plase send your citizen image");
+  } else {
+    // const faceUrl = `http://localhost:${process.env.PORT}/customers/faceImage/${req.files.faceImage[0].originalname}`,
+    //   citizenUrl = `http://localhost:${process.env.PORT}/customers/citizenImage/${req.files.citizenImage[0].originalname}`,
+    //   univUrl = `http://localhost:${process.env.PORT}/customers/univImage/${req.files.univImage[0].originalname}`;
+
+    const faceUrl = `https://project-true.herokuapp.com/customers/faceImage/${req.files.face[0].originalname}`;
+    const idenUrl = `https://project-true.herokuapp.com/customers/identifierImage/${req.files.identifier[0].originalname}`;
+    const studentUrl = `https://project-true.herokuapp.com/customers/studentImage/${req.files.student[0].originalname}`;
+    console.log(faceUrl);
+    console.log(idenUrl);
+    console.log(studentUrl);
+    const newuser = {
+      name: firstName + " " + lastName,
+      birthday,
+      identifier,
+      permanentAddress: {
+        detail: permanent.detail,
+        subdistrict: permanent.subdistrict,
+        district: permanent.district,
+        province: permanent.province,
+        postcode: permanent.postcode,
+      },
+      deliveryAddress: {
+        detail: delivery.detail,
+        subdistrict: delivery.subdistrict,
+        district: delivery.district,
+        province: delivery.province,
+        postcode: delivery.postcode,
+      },
+      phone: phones,
+      email: emails,
+      institution,
+      image: {
+        face: { link: faceUrl, data: req.files.face[0] },
+        identifier: { link: idenUrl, data: req.files.identifier[0] },
+        student: { link: studentUrl, data: req.files.student[0] },
+      },
+    };
+
+    User.create(newuser, (err, user) => {
+      if (err) return res.json({ success: false, error: err });
+      else {
+        return res.json({
+          success: true,
+          message: "Customer's data is saved",
+          user,
+        });
+      }
+    });
   }
-
-
-  // console.log(req.files.univImage);
-else{
-  // const faceUrl = `http://localhost:${process.env.PORT}/customers/faceImage/${req.files.faceImage[0].originalname}`,
-  //   citizenUrl = `http://localhost:${process.env.PORT}/customers/citizenImage/${req.files.citizenImage[0].originalname}`,
-  //   univUrl = `http://localhost:${process.env.PORT}/customers/univImage/${req.files.univImage[0].originalname}`;  
-
-  const faceUrl = `https://project-true.herokuapp.com/customers/faceImage/${req.files.faceImage[0].originalname}`;
-  const citizenUrl = `https://project-true.herokuapp.com/customers/citizenImage/${req.files.citizenImage[0].originalname}`;
-  const univUrl = `https://project-true.herokuapp.com/customers/univImage/${req.files.univImage[0].originalname}`;
-  console.log(faceUrl);
-  console.log(citizenUrl);
-  console.log(univUrl);
-  const newuser = {
-    name: firstname + " " + lastname,
-    birthday,
-    nationalId,
-    address: {
-      houseNo: houseNo,
-      subdistrict: subdistrict,
-      district: district,
-      province: province,
-      postcode: postcode,
-    },
-    addressDelivery: {
-      houseNo: houseNo_c,
-      subdistrict: subdistrict_c,
-      district: district_c,
-      province: province_c,
-      postcode: postcode_c,
-    },
-    phoneNumber,
-    email,
-    university,
-    photos: {
-      faceImage: { link: faceUrl , data :req.files.faceImage[0]},
-      citizenImage: { link: citizenUrl , data :req.files.citizenImage[0]},
-      univImage: { link: univUrl , data :req.files.univImage[0]},
-    },
-  };
-
-  User.create(newuser, (err, user) => {
-    if (err) return res.json({ success: false, error: err });
-    else {
-      return res.json({
-        success: true,
-        message: "Customer's data is saved",
-        user,
-      });
-    }
-  });
-}
-  
 });
 
 router.delete("/:id", async (req, res) => {
@@ -212,9 +206,15 @@ router.delete("/:id", async (req, res) => {
     if (err) return res.json({ success: false, error: err });
     else {
       try {
-        gfsFace.files.deleteOne({ filename: user.photos.faceImage.data.filename });
-        gfsCitizen.files.deleteOne({ filename: user.photos.citizenImage.data.filename });
-        gfsUniv.files.deleteOne({ filename: user.photos.univImage.data.filename });
+        gfsFace.files.deleteOne({
+          filename: user.image.face.data.filename,
+        });
+        gfsIden.files.deleteOne({
+          filename: user.image.identifier.data.filename,
+        });
+        gfsStudent.files.deleteOne({
+          filename: user.image.student.data.filename,
+        });
         return res.send("delete success");
       } catch (error) {
         console.log(error);

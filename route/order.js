@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
     if (orders.length == 0) {
       return res.json({ success: true, message: "Empty order" });
     }
-    console.log(orders.user);
+    // console.log(orders.user);
     return res.json({
       success: true,
       message: "there is " + orders.length + " orders",
@@ -22,14 +22,61 @@ router.get("/", async (req, res) => {
   // .populate("user packages", "name -id");
 });
 
-//Get by Id
+//Get by Id -> how to filter collection
 router.get("/:id", async (req, res) => {
-  await Order.findOne({ _id: req.params.id }, async (err, find) => {
+  if (req.params.id == "filter") {
+    console.log(req.query.day);
+    console.log(req.query.month);
+    console.log(req.query.year);
+    const day = (+req.query.day)+1,
+      month = (+req.query.month)-1,
+      year = (+req.query.year),
+      nextday = day+1;
+      console.log(day);
+      console.log(month);
+      console.log(year);
+      const date = new Date(year,month,nextday);
+    // const dateFilter = Order.filter((orders) => orders.date.toISOString().slice(0,10) == req.query.date)
+    Order.find(
+      {
+        date: {
+          $gte: new Date(year, month, day),
+          $lt: new Date(year, month,nextday),
+        },
+      },
+      (err, orders) => {
+        if (err) return res.json({ success: false, err });
+        return res.json({ success: true, message: orders });
+      }
+    );
+    // return res.send(date)
+  } else {
+    await Order.findOne({ _id: req.params.id }, async (err, find) => {
+      if (err) return res.json({ success: false, error: err });
+      console.log(find.user, find.packages);
+      const userData = await User.findById(
+        { _id: find.user },
+        { _id: 1, name: 1, phoneNumber: 1, addressDelivery: 1 }
+      );
+      const packagesData = await Package.findById(
+        { _id: find.packages[0] },
+        { _id: 1, name: 1 }
+      );
+      return res.json({ success: true, userData, packagesData });
+    });
+  }
+});
+
+//Get by Date
+/*
+router.get("/:date", async (req, res) => {
+  console.log(req.params.date);
+  await Order.findOne({ date: {$gte : new Date(req.params.date) }}, async (err, find) => {
     if(err) return res.json({ success: false, error: err })
     console.log(find.user, find.packages);
     const userData = await User.findById(
       { _id: find.user },
-      { _id: 1, name: 1, phoneNumber: 1, addressDelivery: 1 }
+      { _id: 1, name: 1, phoneNumber1: 1, phoneNumber2: 1, addressDelivery: 1 }
     );
     const packagesData = await Package.findById(
       { _id: find.packages[0] },
@@ -38,24 +85,7 @@ router.get("/:id", async (req, res) => {
     return res.json({ success: true, userData, packagesData})
   });
 });
-
-//Get by Date
-router.get("/:date", async (req, res) => {
-  console.log(new Date());
-  // await Order.findOne({ date: {$gte : new Date(req.params.date) }}, async (err, find) => {
-  //   if(err) return res.json({ success: false, error: err })
-  //   console.log(find.user, find.packages);
-  //   const userData = await User.findById(
-  //     { _id: find.user },
-  //     { _id: 1, name: 1, phoneNumber1: 1, phoneNumber2: 1, addressDelivery: 1 }
-  //   );
-  //   const packagesData = await Package.findById(
-  //     { _id: find.packages[0] },
-  //     { _id: 1, name: 1 }
-  //   );
-  //   return res.json({ success: true, userData, packagesData})
-  // });
-});
+*/
 
 router.post("/", async (req, res) => {
   const { userId, packageId } = req.body;
@@ -86,10 +116,14 @@ router.post("/", async (req, res) => {
     }
   );
 
+  var datetime = new Date();
+  console.log(datetime.toISOString().slice(0, 10));
+
   Order.create(
     {
       user: userOrder,
       packages: packageOrder,
+      date: datetime,
     },
     (err, order) => {
       if (err) return res.json({ success: false, err });
