@@ -11,15 +11,19 @@ exports.register = async (req, res) => {
       message: "Password must be more than 8 characters",
     });
 
-  
   const newAdmin = new Admin(req.body);
   newAdmin.hash_password = bcrypt.hashSync(req.body.password, 10);
+  await Admin.countDocuments((err, count) => {
+    if (count == 0) return (newAdmin.appointment = 1);
+    else return;
+  });
+
   await newAdmin.save((err, admin) => {
     if (err) {
       return res.status(400).send({
         success: false,
         message: "Email already exists",
-        error : err
+        error: err,
       });
     } else {
       admin.hash_password = undefined;
@@ -55,11 +59,15 @@ exports.login = async (req, res) => {
 
 exports.loginRequired = (req, res, next) => {
   if (req.headers && req.headers.authorization) {
-    jwt.verify(req.headers.authorization, process.env.SECRET_KEY, (err, decode) => {
-      if (err) req.Admin = undefined;
-      req.Admin = decode;
-      next();
-    });
+    jwt.verify(
+      req.headers.authorization,
+      process.env.SECRET_KEY,
+      (err, decode) => {
+        if (err) req.Admin = undefined;
+        req.Admin = decode;
+        next();
+      }
+    );
   } else {
     req.Admin = undefined;
     next();
@@ -78,70 +86,80 @@ exports.profile = async (req, res) => {
 
 exports.alladmins = async (req, res) => {
   //get all admin
-  await Admin.find(
-    {},
-    { fullName: 1, email: 1, _id: 1, hash_password: 1 },
-    (err, data) => {
+
+  await Admin.find({}, {}, (err, data) => {
+    res.json({
+      success: true,
+      data: {
+        title: "Admin Dashboard",
+        admins: data,
+      },
+    });
+  });
+};
+
+exports.findbyid = async (req, res) => {
+  await Admin.findById(
+    { _id: req.params.id },
+    { fullName: 1, email: 1, _id: 0, hash_password: 1 },
+    (err, admin) => {
       res.json({
         success: true,
-        data: {
-          title: "Admin Dashboard",
-          admins: data,
-        },
+        admin,
       });
     }
   );
 };
 
-exports.findbyid = async (req, res) => {
-  await Admin.findById(
-    {_id: req.params.id},
-    { fullName: 1, email: 1, _id: 0, hash_password: 1 },
-    (err, admin) => {
-      res.json({
-        success: true,
-        admin
-      });
-    }
-  );
-}
-
 exports.forgotPassword = async (req, res) => {
   //input email
   //input newpassword
+  //input headerpssword
   if (req.body.newpassword.length < 8) {
     return res.json({
       success: false,
       message: "Password must be 8 characters",
     });
   }
-
-  await Admin.findOne(
-    {
-      email: req.body.email,
-    },
-    (err, admin) => {
-      if (err) throw err;
-      if (!admin) {
-        return res.status(401).json({
-          success: false,
-          message: "Authentication failed. Invalid Admin.",
-        });
-      }
-      if (admin.comparePassword(req.body.newpassword)) {
-        return res.json({
-          success: false,
-          message: "Newpassword is same as password",
-        });
-      }
-      admin.hash_password = bcrypt.hashSync(req.body.newpassword, 10);
-      admin.save();
-      return res.json({
-        success: true,
-        message: "Password changed",
-      });
+  await Admin.find({ appointment: 1 }, async (err, headerAdmin) => {
+    if (err) res.json({ success: false, error: err });
+    
+    if (headerAdmin[0].comparePassword(req.body.headerpassword)) {
+      // console.log(headerAdmin[0]);
+      
+      await Admin.findOne(
+        {
+          email: req.body.email,
+        },
+        (err, admin) => {
+          if (err) throw err;
+          if (!admin) {
+            return res.status(401).json({
+              success: false,
+              message: "Authentication failed. Invalid Admin.",
+            });
+          }
+          if (admin.comparePassword(req.body.newpassword)) {
+            return res.json({
+              success: false,
+              message: "Newpassword is same as old password",
+            });
+          }
+          admin.hash_password = bcrypt.hashSync(req.body.newpassword, 10);
+          admin.created = new Date();
+          admin.save();
+          return res.json({
+            success: true,
+            message: "Password changed",
+          });
+        }
+      );
+      
     }
-  );
+    else{
+      return res.json({success: false,message:'Header Admin is invalid'})
+    }
+  });
 };
 
 exports.delete = async (req, res) => {
