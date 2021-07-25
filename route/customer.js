@@ -25,9 +25,9 @@ const storage = new GridFsStorage({
   file: (req, file) => {
     const filename = file.originalname;
     let bName;
-    if (file.fieldname === "face") bName = "FaceImage";
-    if (file.fieldname === "identifier") bName = "IdenImage";
-    if (file.fieldname === "student") bName = "StudentImage";
+    if (file.fieldname === "faceImage") bName = "FaceImage";
+    if (file.fieldname === "identifierImage") bName = "IdenImage";
+    if (file.fieldname === "studentImage") bName = "StudentImage";
     return {
       filename: filename,
       bucketName: bName,
@@ -37,9 +37,9 @@ const storage = new GridFsStorage({
 
 const upload = multer({ storage: storage });
 const multiUploads = upload.fields([
-  { name: "face", maxCount: 1 },
-  { name: "identifier", maxCount: 1 },
-  { name: "student", maxCount: 1 },
+  { name: "faceImage", maxCount: 1 },
+  { name: "identifierImage", maxCount: 1 },
+  { name: "studentImage", maxCount: 1 },
 ]);
 
 router.get("/faceImage/:filename", async (req, res) => {
@@ -83,22 +83,51 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/filter", async (req, res) => {
+  //@param {ArrayObject}
+  //ex. email  test9@test9.com
+  const {
+    _id,
+    name,
+    phone,
+    email,
+    institution,
+    university,
+    birthday,
+    indentifier,
+    permanentAddress,
+    deliveryAddress,
+  } = req.query;
+  console.log(req.query);
   try {
     let result;
-    if (req.query.name) {
+    if (name) {
       result = await User.find({
-        name: new RegExp("^" + `${req.query.name}` + "$", "i"),
-      }).exec();
-    } else {
-      result = await User.find(req.query);
-    }
-    if (resault) {
-      return res.json({
-        success: true,
-        message: "The result is " + result.length,
-        result,
+        name: new RegExp("^" + `${name}` + "$", "i"),
       });
     }
+    if (
+      phone ||
+      email ||
+      institution ||
+      _id ||
+      university ||
+      birthday ||
+      indentifier ||
+      permanentAddress ||
+      deliveryAddress
+    ) {
+      result = await User.find(req.query);
+    } else {
+      return res.json({
+        success: false,
+        message: "Required fields are not supplied",
+      });
+    }
+    return res.json({
+      success: true,
+      message: "The result is " + result.length,
+      result,
+    });
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -143,9 +172,9 @@ router.post("/", multiUploads, (req, res) => {
   if (req.files.student == undefined) {
     return res.send("if you are not a student plase send your citizen image");
   } else {
-    const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${req.files.face[0].originalname}`;
-    const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${req.files.identifier[0].originalname}`;
-    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${req.files.student[0].originalname}`;
+    const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${req.files.faceImage[0].originalname}`;
+    const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${req.files.identifierImage[0].originalname}`;
+    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${req.files.studentImage[0].originalname}`;
     console.log(faceUrl);
     console.log(idenUrl);
     console.log(studentUrl);
@@ -159,9 +188,9 @@ router.post("/", multiUploads, (req, res) => {
       email: emails,
       institution,
       image: {
-        face: { link: faceUrl, data: req.files.face[0] },
-        identifier: { link: idenUrl, data: req.files.identifier[0] },
-        student: { link: studentUrl, data: req.files.student[0] },
+        faceImage: { link: faceUrl, data: req.files.faceImage[0] },
+        identifierImage: { link: idenUrl, data: req.files.identifierImage[0] },
+        studentImage: { link: studentUrl, data: req.files.studentImage[0] },
       },
     };
 
@@ -184,13 +213,13 @@ router.delete("/:id", async (req, res) => {
     else {
       try {
         gfsFace.files.deleteOne({
-          filename: user.image.face.data.filename,
+          filename: user.image.faceImage.data.filename,
         });
         gfsIden.files.deleteOne({
-          filename: user.image.identifier.data.filename,
+          filename: user.image.identifierImage.data.filename,
         });
         gfsStudent.files.deleteOne({
-          filename: user.image.student.data.filename,
+          filename: user.image.studentImage.data.filename,
         });
         return res.send("delete success");
       } catch (error) {

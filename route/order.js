@@ -5,7 +5,7 @@ const Package = require("../model/Package_model");
 const Order = require("../model/Order_model");
 
 router.get("/", async (req, res) => {
-  await Order.find({}, {__v:0}, (err, orders) => {
+  await Order.find({}, { __v: 0 }, (err, orders) => {
     if (err) {
       return res.json({ success: false, err });
     }
@@ -35,24 +35,76 @@ router.get("/filter", async (req, res) => {
       .end();
   }
   try {
+    // console.log(req.query._id);
+    // let results = await Order.find(fields);
 
-    let results = await Order.find(fields);
+    // if (results.length >= 1) {
+    //   return res.status(200).json({
+    //     success: true,
+    //     result: results,
+    //     message: "Successfully found all documents",
+    //   });
+    // } else {
+    //   return res
+    //     .status(202)
+    //     .json({
+    //       success: false,
+    //       result: [],
+    //       message: "No document found by this request",
+    //     })
+    //     .end();
+    // }
+    if (req.query.calender) {
+      console.log(req.query.calender);
+      const date = req.query.calender.split("-");
+      console.log(date);
 
-    if (results.length >= 1) {
-      return res.status(200).json({
-        success: true,
-        result: results,
-        message: "Successfully found all documents",
+      const day = parseInt(date[0]),
+        nextday = parseInt(date[0]) + 1,
+        month = parseInt(date[1]),
+        year = date[2];
+      Order.find(
+        {
+          date: {
+            $gte: new Date(`${year}-${month}-${day}`),
+            $lt: new Date(`${year}-${month}-${nextday}`),
+          },
+        },
+        (err, orders) => {
+          if (err) return res.json({ success: false, err });
+          return res.json({ success: true, amount: orders.length, orders });
+        }
+      );
+    }
+
+    if (req.query._id) {
+      Order.findOne({ _id: req.query._id }, async (err, find) => {
+        if (err) return res.json({ success: false, error: err });
+        console.log(find);
+        // console.log(find.user, find.packages);
+        try {
+          const userData = await User.findById(
+            { _id: find.user },
+            { _id: 1, name: 1, phoneNumber: 1, addressDelivery: 1 }
+          );
+          const packagesData = await Package.findById(
+            { _id: find.packages[0] },
+            { _id: 1, name: 1 }
+          );
+          if (userData == undefined || packagesData == undefined)
+            return res.json({
+              success: false,
+              message: "user not found or packages not found",
+            });
+          return res.json({
+            success: true,
+            user: userData,
+            packages: packagesData,
+          });
+        } catch (err) {
+          res.json({ success: false });
+        }
       });
-    } else {
-      return res
-        .status(202)
-        .json({
-          success: false,
-          result: [],
-          message: "No document found by this request",
-        })
-        .end();
     }
   } catch {
     return res.status(500).json({
@@ -61,47 +113,6 @@ router.get("/filter", async (req, res) => {
       message: "Oops there is an Error",
     });
   }
-  /*if (req.params.id == "filterDate") {
-    const date = req.query.datefilter.split("-");
-    console.log(date);
-
-    const day = parseInt(date[0]),
-      nextday = parseInt(date[0]) + 1,
-      month = parseInt(date[1]),
-      year = date[2];
-    Order.find(
-      {
-        date: {
-          $gte: new Date(`${year}-${month}-${day}`),
-          $lt: new Date(`${year}-${month}-${nextday}`),
-        },
-      },
-      (err, orders) => {
-        if (err) return res.json({ success: false, err });
-        return res.json({ success: true, amount: orders.length, orders });
-      }
-    );
-  }
-  if(req.params.id == "filterName"){
-    console.log();
-    // const Name = await Order.find({user: {name : req.query.name}})
-    // return res.json(Name)
-  }
-  else {
-    await Order.findOne({ _id: req.params.id }, async (err, find) => {
-      if (err) return res.json({ success: false, error: err });
-      console.log(find.user, find.packages);
-      const userData = await User.findById(
-        { _id: find.user },
-        { _id: 1, name: 1, phoneNumber: 1, addressDelivery: 1 }
-      ).exec();
-      const packagesData = await Package.findById(
-        { _id: find.packages[0] },
-        { _id: 1, name: 1 }
-      );
-      return res.json({ success: true, userData, packagesData });
-    });
-  }*/
 });
 
 router.post("/", async (req, res) => {
@@ -116,7 +127,7 @@ router.post("/", async (req, res) => {
       message: "userId or packageId is invalid",
     });
 
-  const userOrder = await User.find(
+  const userOrder = await User.findOne(
     { _id: userId },
     {
       name: 1,
@@ -161,9 +172,8 @@ router.delete("/:id", async (req, res) => {
   });
 });
 
-
 router.put("/:id", async (req, res) => {
-  //update status 
+  //update status
   try {
     // Find document by id and updates with the required fields
     const result = await Order.findOneAndUpdate(
@@ -198,6 +208,5 @@ router.put("/:id", async (req, res) => {
     }
   }
 });
-
 
 module.exports = router;

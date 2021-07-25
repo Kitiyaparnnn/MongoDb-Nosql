@@ -22,9 +22,9 @@ const UserSchema = mongoose.Schema({
   email: [{ type: String, required: true }],
   institution: { type: String, default: "" },
   image: {
-    face: { link: String, data: Object },
-    identifier: { link: String, data: Object, default: "" },
-    student: { link: String, data: Object, default: "" },
+    faceImage: { link: String, data: Object },
+    identifierImage: { link: String, data: Object, default: "" },
+    studentImage: { link: String, data: Object, default: "" },
   },
 });
 
