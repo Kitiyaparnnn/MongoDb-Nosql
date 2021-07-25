@@ -35,25 +35,13 @@ router.get("/filter", async (req, res) => {
       .end();
   }
   try {
-    // console.log(req.query._id);
-    // let results = await Order.find(fields);
-
-    // if (results.length >= 1) {
-    //   return res.status(200).json({
-    //     success: true,
-    //     result: results,
-    //     message: "Successfully found all documents",
-    //   });
-    // } else {
-    //   return res
-    //     .status(202)
-    //     .json({
-    //       success: false,
-    //       result: [],
-    //       message: "No document found by this request",
-    //     })
-    //     .end();
-    // }
+    if(req.query.status){
+      console.log(req.query.status);
+      Order.find(req.query,(err,orders) => {
+        if (err) return res.json({ success: false})
+        return res.json({ success: true, amount: orders.length,orders})
+      })
+    }
     if (req.query.calender) {
       console.log(req.query.calender);
       const date = req.query.calender.split("-");
@@ -78,7 +66,7 @@ router.get("/filter", async (req, res) => {
     }
 
     if (req.query._id) {
-      Order.findOne({ _id: req.query._id }, async (err, find) => {
+      Order.find({ _id: req.query._id }, async (err, find) => {
         if (err) return res.json({ success: false, error: err });
         console.log(find);
         // console.log(find.user, find.packages);

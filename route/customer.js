@@ -166,10 +166,10 @@ router.post("/", multiUploads, (req, res) => {
     });
   }
 
-  if (req.files.face == undefined || req.files.identifier == undefined) {
+  if (req.files.faceImage == undefined || req.files.identifierImage == undefined) {
     return res.send("must select the files");
   }
-  if (req.files.student == undefined) {
+  if (req.files.studentImage == undefined) {
     return res.send("if you are not a student plase send your citizen image");
   } else {
     const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${req.files.faceImage[0].originalname}`;
