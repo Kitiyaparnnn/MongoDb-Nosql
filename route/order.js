@@ -18,8 +18,7 @@ router.get("/", async (req, res) => {
       message: "there is " + orders.length + " orders",
       orders,
     });
-  });
-  // .populate("user packages", "name -id");
+  }).populate("user packages", "name");
 });
 
 //Get by Id -> how to filter collection

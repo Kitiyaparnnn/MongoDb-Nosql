@@ -166,45 +166,50 @@ router.post("/", multiUploads, (req, res) => {
     });
   }
 
-  if (req.files.faceImage == undefined || req.files.identifierImage == undefined) {
+  if (
+    req.files.faceImage == undefined ||
+    req.files.identifierImage == undefined
+  ) {
     return res.send("must select the files");
   }
-  if (req.files.studentImage == undefined) {
-    return res.send("if you are not a student plase send your citizen image");
-  } else {
-    const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${req.files.faceImage[0].originalname}`;
-    const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${req.files.identifierImage[0].originalname}`;
-    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${req.files.studentImage[0].originalname}`;
-    console.log(faceUrl);
-    console.log(idenUrl);
-    console.log(studentUrl);
-    const newuser = {
-      name: firstName + " " + lastName,
-      birthday,
-      identifier,
-      permanentAddress: permanent,
-      deliveryAddress: delivery,
-      phone: phones,
-      email: emails,
-      institution,
-      image: {
-        faceImage: { link: faceUrl, data: req.files.faceImage[0] },
-        identifierImage: { link: idenUrl, data: req.files.identifierImage[0] },
-        studentImage: { link: studentUrl, data: req.files.studentImage[0] },
-      },
-    };
+  const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${req.files.faceImage[0].originalname}`;
+  const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${req.files.identifierImage[0].originalname}`;
+  console.log(faceUrl);
+  console.log(idenUrl);
+  const image = {
+    faceImage: { link: faceUrl, data: req.files.faceImage[0] },
+    identifierImage: { link: idenUrl, data: req.files.identifierImage[0] },
+  };
 
-    User.create(newuser, (err, user) => {
-      if (err) return res.json({ success: false, error: err });
-      else {
-        return res.json({
-          success: true,
-          message: "Customer's data is saved",
-          user,
-        });
-      }
-    });
+  if (req.files.studentImage) {
+    // return res.send("if you are not a student plase send your citizen image");
+    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${req.files.studentImage[0].originalname}`;
+    console.log(studentUrl);
+    image.studentImage = { link: studentUrl, data: req.files.studentImage[0] };
   }
+
+  const newuser = {
+    name: firstName + " " + lastName,
+    birthday,
+    identifier,
+    permanentAddress: permanent,
+    deliveryAddress: delivery,
+    phone: phones,
+    email: emails,
+    institution,
+    image: image,
+  };
+
+  User.create(newuser, (err, user) => {
+    if (err) return res.json({ success: false, error: err });
+    else {
+      return res.json({
+        success: true,
+        message: "Customer's data is saved",
+        user,
+      });
+    }
+  });
 });
 
 router.delete("/:id", async (req, res) => {
