@@ -217,15 +217,21 @@ router.delete("/:id", async (req, res) => {
     if (err) return res.json({ success: false, error: err });
     else {
       try {
+        console.log(user.image.faceImage);
         gfsFace.files.deleteOne({
           filename: user.image.faceImage.data.filename,
         });
+        console.log(user.image.identifierImage);
         gfsIden.files.deleteOne({
           filename: user.image.identifierImage.data.filename,
         });
-        gfsStudent.files.deleteOne({
-          filename: user.image.studentImage.data.filename,
-        });
+        if (user.image.studentImage == '') {
+          console.log(user.image.studentImage);
+          gfsStudent.files.deleteOne({
+            filename: user.image.studentImage.data.filename,
+          });
+        }
+        // User.findByIdAndDelete(req.params.id)
         return res.send("delete success");
       } catch (error) {
         console.log(error);

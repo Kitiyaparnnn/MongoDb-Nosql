@@ -24,7 +24,7 @@ const UserSchema = mongoose.Schema({
   image: {
     faceImage: { link: String, data: Object },
     identifierImage: { link: String, data: Object, default: "" },
-    studentImage: { link: String, data: Object, default: "" },
+    studentImage: { link: String, data: Object, default: '' },
   },
 });
 
