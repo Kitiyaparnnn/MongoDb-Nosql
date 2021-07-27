@@ -1,22 +1,24 @@
 const mongoose = require("mongoose");
 
-const pacFormat = mongoose.Schema({
-  packageType: { type: String, required: true, default: "Post Paid" },
-  name: String,
+const PackageSchema = mongoose.Schema({
+  package_type: { type: String, required: true, default: "Post Paid" },
+  nameThai: String,
+  nameEng: String,
   internet_type: { type: String, required: true },
   price: { type: Number, required: true },
   calltime: { type: Number, default: 0 }, //เฉพาะโทรนอกเครือข่าย
-  internet_speed: { type: Number, required: true }, //GB,1000 is unlimited //call data
-  moreDetials: {
-    description: [{ type: String }],
-    wifi: String,
-    morebenefit: [{ type: String }],
-  }
-});
-
-const PackageSchema = mongoose.Schema({
-  verThai: pacFormat,
-  verEng: pacFormat,
+  internet_speed: { type: Number, required: true }, //GB,1000 is unlimited //call data,
+  isMNP:{ type:Boolean, default:false},
+  detailThai: [
+    {
+      type: String,
+    },
+  ],
+  detailEng: [
+    { 
+      type: String 
+    }
+  ],
   date: { type: Date, default: Date.now },
 });
 
