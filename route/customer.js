@@ -74,7 +74,7 @@ router.get("/studentImage/:filename", async (req, res) => {
   }
 });
 
-//Get all users
+//get all users
 router.get("/", async (req, res) => {
   await User.find({}, { __v: 0 }, (err, users) => {
     if (err) return res.json({ success: false, error: err });
@@ -172,6 +172,14 @@ router.post("/", multiUploads, (req, res) => {
   ) {
     return res.send("must select the files");
   }
+
+  if (
+    req.files.identifierImage[0].filename === req.files.faceImage[0].filename ||
+    req.files.identifierImage[0].filename === req.files.studentImage[0].filename ||
+    req.files.faceImage[0].filename === req.files.studentImage[0].filename
+  ) {
+    return res.send("image is duplicated");
+  }
   const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${req.files.faceImage[0].originalname}`;
   const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${req.files.identifierImage[0].originalname}`;
   console.log(faceUrl);
@@ -182,7 +190,6 @@ router.post("/", multiUploads, (req, res) => {
   };
 
   if (req.files.studentImage) {
-    // return res.send("if you are not a student plase send your citizen image");
     const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${req.files.studentImage[0].originalname}`;
     console.log(studentUrl);
     image.studentImage = { link: studentUrl, data: req.files.studentImage[0] };
@@ -225,7 +232,7 @@ router.delete("/:id", async (req, res) => {
         gfsIden.files.deleteOne({
           filename: user.image.identifierImage.data.filename,
         });
-        if (user.image.studentImage == '') {
+        if (user.image.studentImage == "") {
           console.log(user.image.studentImage);
           gfsStudent.files.deleteOne({
             filename: user.image.studentImage.data.filename,

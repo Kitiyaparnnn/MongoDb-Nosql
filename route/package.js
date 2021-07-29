@@ -32,7 +32,7 @@ router.get("/:id", async (req, res) => {
   let postpaid_minSpeed = parseInt(process.env.postpaid_minSpeed);
   let postpaid_maxSpeed = parseInt(process.env.postpaid_maxSpeed);
   let p_range = parseInt(process.env.range);
-
+  //get packages range
   if (req.params.id === "ranges") {
     const ranges = {
       prepaid: {
@@ -60,15 +60,20 @@ router.get("/:id", async (req, res) => {
       messages: "maxData,maxSpeed 1000 = unlimited",
       ranges,
     });
-  }else if (req.params.id === "detail") {
-    // @params id
-    Package.findById(req.query,{moreDetials:1 , detailThai:1 ,detailEng:1},(err, packageDetails) => {
-      if (err) return res.json({ success: false, error: err });
-      return res.json({ success: true,packageDetails})
-    })
   }
-   else if (req.params.id === "filter") {
-    // try {
+  //get detail for each package by id
+  else if (req.params.id === "detail") {
+    Package.findById(
+      req.query,
+      { moreDetials: 1, detailThai: 1, detailEng: 1 },
+      (err, packageDetails) => {
+        if (err) return res.json({ success: false, error: err });
+        return res.json({ success: true, packageDetails });
+      }
+    );
+  }
+  //filter packages
+  else if (req.params.id === "filter") {
     let packageType = req.query.packageType,
       internetType = req.query.internetType,
       internetSpeedType = req.query.internetSpeedType,
@@ -96,7 +101,8 @@ router.get("/:id", async (req, res) => {
     if (maxData == "") maxData = postpaid_maxData;
     if (isMNP == "") isMNP = process.env.isMNP;
     if (range == "") range = p_range;
-    console.log(isMNP);
+    // console.log(isMNP);
+
     if (packageType === "Post Paid") {
       if (internetType == "") internetType = process.env.postpaid_internetType;
       if (minFee == "") minFee = postpaid_minFee;
@@ -119,7 +125,6 @@ router.get("/:id", async (req, res) => {
             price: 1,
             calltime: 1,
             internet_speed: 1,
-            // moreDetials: 1,
           }
         ).sort({ price: 1 });
         return res.json({
@@ -141,42 +146,39 @@ router.get("/:id", async (req, res) => {
             internet_speed: {
               $gte: minData,
               $lte: maxData,
-            }, 
+            },
           },
           {
-            name:1,
+            name: 1,
             nameThai: 1,
             internet_type: 1,
             price: 1,
             calltime: 1,
             internet_speed: 1,
-            // moreDetials: 1,
           },
-          (err, data) => {
+          (err, package) => {
             if (err)
               return res.json({
                 success: false,
                 message: "Please select all package detials filter",
                 error: err,
               });
-            console.log(data.length);
-            if (data.length == 0) {
+            console.log(package.length);
+            if (package.length == 0) {
               return res.json({
                 success: true,
                 messages: "The result is empty",
               });
-            } else {
             }
             return res.json({
               success: true,
-              messages: "The result has " + data.length,
-              packages: data,
+              messages: "The result has " + package.length,
+              packages: package,
             });
           }
         )
           .sort({ internet_speed: 1, price: 1, name: 1, calltime: -1 })
           .limit(parseInt(range));
-        // .skip({name : /(MNP)/i});
       }
     }
 
@@ -186,56 +188,92 @@ router.get("/:id", async (req, res) => {
       if (maxFee == "") maxFee = prepaid_maxFee;
       if (minData == "") minData = prepaid_minData;
       console.log("pre paid process");
-
-      await Package.find(
-        {
-          package_type: packageType,
-          internet_type: internetType,
-          price: { $gte: minFee, $lte: maxFee },
-          calltime: {
-            $gte: minDuration,
-            $lte: maxDuration,
-          },
-          internet_speed: {
-            $gte: minData,
-            $lte: maxData,
-          },
-        },
-        {
-          name: 1,
-          internet_type: 1,
-          price: 1,
-          calltime: 1,
-          internet_speed: 1,
-          // moreDetials: 1,
-        },
-        (err, data) => {
-          if (err)
-            return res.json({
-              success: false,
-              message: "Please select all package detials filter",
-              error: err,
-            });
-          if (data.length == 0) {
-            return res.json({
-              success: true,
-              messages: "The result is empty",
-            });
-          } else
-            return res.json({
-              success: true,
-              messages: "The resault has " + data.length,
-              packages: data,
-            });
+      //กรณีกรอกข้อมูล เติมเงิน ราคาแพ็คเกจ ปริมาณการใช้อินเทอร์เน็ต
+      let package;
+      try {
+        if (minFee != "" && maxFee != "" && minData != "" && maxData != "") {
+          package = await Package.find(
+            {
+              package_type: packageType,
+              price: { $gte: minFee, $lte: maxFee },
+              calltime: {
+                $gte: minDuration,
+                $lte: maxDuration,
+              },
+              internet_speed: {
+                $gte: minData,
+                $lte: maxData,
+              },
+            },
+            {
+              name: 1,
+              internet_type: 1,
+              price: 1,
+              calltime: 1,
+              internet_speed: 1,
+            }
+          )
+            .sort({
+              calltime: 1,
+              internet_speed: -1,
+              price: -1,
+              internet_type: 1,
+            })
+            .limit(range);
         }
-      )
-        .sort({ calltime: 1, internet_speed: -1, price: -1 })
-        .limit(range);
+        //กรณีอื่นๆ
+        else {
+          package = await Package.find(
+            {
+              package_type: packageType,
+              price: { $gte: minFee, $lte: maxFee },
+              calltime: {
+                $gte: minDuration,
+                $lte: maxDuration,
+              },
+              internet_speed: {
+                $gte: minData,
+                $lte: maxData,
+              },
+            },
+            {
+              name: 1,
+              internet_type: 1,
+              price: 1,
+              calltime: 1,
+              internet_speed: 1,
+            }
+          )
+            .sort({
+              calltime: 1,
+              internet_speed: -1,
+              price: 1,
+            })
+            .limit(range);
+        }
+      } catch (err) {
+        return res.json({
+          success: false,
+          message: "Please select all package detials filter",
+          error: err,
+        })
+      }
+
+      if (package.length == 0) {
+        return res.json({
+          success: true,
+          messages: "The result is empty",
+        });
+      }
+      return res.json({
+        success: true,
+        messages: "The resault has " + package.length,
+        packages: package,
+      });
     }
-    // } catch (err) {
-    //   res.json({ message: "Not enough information",err});
-    // }
-  } else {
+  }
+  //filter by id
+  else {
     Package.findById({ _id: req.params.id }, {}, (err, package) => {
       if (err) return res.json({ success: false, error: err });
       else {
@@ -249,26 +287,6 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  // const {
-  //   package_type,
-  //   name,
-  //   internet_type,
-  //   price,
-  //   calltime,
-  //   internet_speed,
-  //   moreDetials,
-  // } = req.body;
-  // if (
-  //   package_type.length === 0 ||
-  //   name.length === 0 ||
-  //   internet_type.length === 0 ||
-  //   price === null ||
-  //   calltime === null ||
-  //   internet_speed === null
-  // ) {
-  //   return res.json({ success: false, error: "Invalid Input" });
-  // }
-
   const newpackage = new Package(req.body);
   console.log(newpackage);
   await newpackage.save((err, package) => {
@@ -278,16 +296,6 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  // const {
-  //   package_type,
-  //   name,
-  //   internet_type,
-  //   price,
-  //   calltime,
-  //   internet_speed,
-  //   moreDetials,
-  // } = req.body;
-
   const { id } = req.params;
   console.log(req.body);
   await Package.findOneAndUpdate(

@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const PackageSchema = mongoose.Schema({
   package_type: { type: String, required: true, default: "Post Paid" },
-  nameThai: String,
-  nameEng: String,
+  nameThai:{ type: String, default:""},
+  nameEng: { type: String, default:""},
   internet_type: { type: String, required: true },
   price: { type: Number, required: true },
   calltime: { type: Number, default: 0 }, //เฉพาะโทรนอกเครือข่าย
@@ -22,7 +22,6 @@ const PackageSchema = mongoose.Schema({
   date: { type: Date, default: Date.now },
 });
 
-//limit price 19-2000
 
 //Post Paid
 //limit calltime 0-800 min

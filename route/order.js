@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
   }).populate("user packages", "name");
 });
 
-//Get by Id -> how to filter collection
+
 router.get("/filter", async (req, res) => {
   if (req.query === undefined || req.query === "" || req.query === " ") {
     return res
@@ -34,6 +34,7 @@ router.get("/filter", async (req, res) => {
       .end();
   }
   try {
+    //filter by status
     if(req.query.status){
       console.log(req.query.status);
       Order.find(req.query,(err,orders) => {
@@ -41,6 +42,7 @@ router.get("/filter", async (req, res) => {
         return res.json({ success: true, amount: orders.length,orders})
       })
     }
+    //filter by date
     if (req.query.calender) {
       console.log(req.query.calender);
       const date = req.query.calender.split("-");
@@ -63,7 +65,7 @@ router.get("/filter", async (req, res) => {
         }
       );
     }
-
+    //filter by id
     if (req.query._id) {
       Order.find({ _id: req.query._id }, async (err, find) => {
         if (err) return res.json({ success: false, error: err });
@@ -78,7 +80,7 @@ router.get("/filter", async (req, res) => {
             { _id: find.packages[0] },
             { _id: 1, name: 1 }
           );
-          if (userData == undefined || packagesData == undefined)
+          if (userData == [] || packagesData == undefined)
             return res.json({
               success: false,
               message: "user not found or packages not found",
@@ -160,14 +162,13 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  //update status
+  //update status @body status
   try {
-    // Find document by id and updates with the required fields
     const result = await Order.findOneAndUpdate(
       { _id: req.params.id },
       req.body,
       {
-        new: true, // return the new result instead of the old one
+        new: true,
         runValidators: true,
       }
     ).exec();
@@ -178,7 +179,6 @@ router.put("/:id", async (req, res) => {
       message: "we update this document by this id: " + req.params.id,
     });
   } catch (err) {
-    // If err is thrown by Mongoose due to required validations
     if (err.name == "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -186,7 +186,6 @@ router.put("/:id", async (req, res) => {
         message: "Required fields are not supplied",
       });
     } else {
-      // Server Error
       return res.status(500).json({
         success: false,
         result: null,
