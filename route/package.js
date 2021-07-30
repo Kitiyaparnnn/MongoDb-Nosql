@@ -81,16 +81,17 @@ router.get("/:id", async (req, res) => {
       maxFee = +req.query.maxFee,
       minFreeCall = +req.query.minFreeCall,
       maxFreeCall = +req.query.maxFreeCall,
-      minData = +req.query.minData,
-      maxData = +req.query.maxData,
-      minSpeed = +req.query.minSpeed,
-      maxSpeed = +req.query.maxSpeed,
+      minData = +req.query.minData, //main param to filter
+      maxData = +req.query.maxData, //main param to filter
+      minSpeed = +req.query.minSpeed, //for fixed speed
+      maxSpeed = +req.query.maxSpeed, //for fixed speed
       minDuration = +req.query.minDuration,
       maxDuration = +req.query.maxDuration,
       isMNP = req.query.isMNP,
       range = +req.query.range;
 
     console.log(req.query);
+
     if (packageType == "") packageType = process.env.packageType;
     if (internetSpeedType == "")
       internetSpeedType = process.env.internetSpeedType;
@@ -115,6 +116,7 @@ router.get("/:id", async (req, res) => {
         minData = minSpeed;
         maxData = maxSpeed;
       }
+      //filter MNP
       if (!isMNP) {
         console.log("MNP process");
         const MNP = await Package.find(
@@ -134,64 +136,107 @@ router.get("/:id", async (req, res) => {
         });
       } else {
         console.log("post paid process");
-        await Package.find(
-          {
-            package_type: packageType,
-            internet_type: internetType,
-            price: { $gte: minFee, $lte: maxFee },
-            calltime: {
-              $gte: minFreeCall,
-              $lte: maxFreeCall,
-            },
-            internet_speed: {
-              $gte: minData,
-              $lte: maxData,
-            },
-          },
-          {
-            name: 1,
-            nameThai: 1,
-            internet_type: 1,
-            price: 1,
-            calltime: 1,
-            internet_speed: 1,
-          },
-          (err, package) => {
-            if (err)
-              return res.json({
-                success: false,
-                message: "Please select all package detials filter",
-                error: err,
-              });
-            console.log(package.length);
-            if (package.length == 0) {
-              return res.json({
-                success: true,
-                messages: "The result is empty",
-              });
-            }
-            return res.json({
-              success: true,
-              messages: "The result has " + package.length,
-              packages: package,
-            });
+        let package;
+        try {
+          //กรณีกรอกข้อมูล ราคาแพ็คเกจ ปริมาณการใช้อินเทอร์เน็ต ระยะเวลาโทร
+          if (
+            req.query.minFee != "" &&
+            req.query.maxFee != "" &&
+            req.query.minData != "" &&
+            req.query.maxData != "" &&
+            req.query.minFreeCall != "" &&
+            req.query.maxFreeCall != ""
+          ) {
+            package = await Package.find(
+              {
+                package_type: packageType,
+                // internet_type: internetType,
+                price: { $gte: minFee, $lte: maxFee },
+                calltime: {
+                  $gte: minFreeCall,
+                  $lte: maxFreeCall,
+                },
+                internet_speed: {
+                  $gte: minData,
+                  $lte: maxData,
+                },
+                // isMNP:false
+              },
+              {
+                name: 1,
+                nameThai: 1,
+                internet_type: 1,
+                price: 1,
+                calltime: 1,
+                internet_speed: 1,
+              }
+            )
+              .sort({ price: 1, name: 1, internet_speed: 1, calltime: -1 })
+              .limit(range);
           }
-        )
-          .sort({ internet_speed: 1, price: 1, name: 1, calltime: -1 })
-          .limit(parseInt(range));
+          else{
+            package = await Package.find(
+              {
+                package_type: packageType,
+                // internet_type: internetType,
+                price: { $gte: minFee, $lte: maxFee },
+                calltime: {
+                  $gte: minFreeCall,
+                  $lte: maxFreeCall,
+                },
+                internet_speed: {
+                  $gte: minData,
+                  $lte: maxData,
+                },
+              },
+              {
+                name: 1,
+                nameThai: 1,
+                internet_type: 1,
+                price: 1,
+                calltime: 1,
+                internet_speed: 1,
+              }
+            )
+              .sort({ price: 1, internet_speed: 1, calltime: -1 })
+              .limit(range);
+          }
+        } catch (err) {
+          return res.json({
+            success: false,
+            message: "Please select all package detials filter",
+            error: err,
+          });
+        }
+        if (package.length == 0 || package.length == undefined) {
+          return res.json({
+            success: true,
+            messages: "The result is empty",
+          });
+        }
+        return res.json({
+          success: true,
+          messages: "The result has " + package.length,
+          packages: package,
+        });
       }
     }
 
     if (packageType === "Pre Paid") {
+      let package;
       if (internetType == "") internetType = process.env.prepaid_internetType;
       if (minFee == "") minFee = prepaid_minFee;
       if (maxFee == "") maxFee = prepaid_maxFee;
       if (minData == "") minData = prepaid_minData;
       console.log("pre paid process");
-      //กรณีกรอกข้อมูล เติมเงิน ราคาแพ็คเกจ ปริมาณการใช้อินเทอร์เน็ต
-      let package;
+      //กรณีกรอกข้อมูล ราคาแพ็คเกจ ปริมาณการใช้อินเทอร์เน็ต
       try {
-        if (minFee != "" && maxFee != "" && minData != "" && maxData != "") {
+        if (
+          req.query.minFee != "" &&
+          req.query.maxFee != "" &&
+          req.query.minData != "" &&
+          req.query.maxData != ""
+        ) {
           package = await Package.find(
             {
               package_type: packageType,
@@ -245,9 +290,9 @@ router.get("/:id", async (req, res) => {
             }
           )
             .sort({
-              calltime: 1,
-              internet_speed: -1,
               price: 1,
+              internet_speed: -1,
+              calltime: 1,
             })
             .limit(range);
         }
@@ -256,7 +301,7 @@ router.get("/:id", async (req, res) => {
           success: false,
           message: "Please select all package detials filter",
           error: err,
-        })
+        });
       }
 
       if (package.length == 0) {

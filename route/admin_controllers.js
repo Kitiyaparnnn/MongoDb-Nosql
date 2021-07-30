@@ -124,10 +124,10 @@ exports.forgotPassword = async (req, res) => {
   }
   await Admin.find({ appointment: 1 }, async (err, headerAdmin) => {
     if (err) res.json({ success: false, error: err });
-    
+
     if (headerAdmin[0].comparePassword(req.body.headerpassword)) {
       // console.log(headerAdmin[0]);
-      
+
       await Admin.findOne(
         {
           email: req.body.email,
@@ -155,26 +155,29 @@ exports.forgotPassword = async (req, res) => {
           });
         }
       );
-      
-    }
-    else{
-      return res.json({success: false,message:'Header Admin is invalid'})
+    } else {
+      return res.json({ success: false, message: "Header Admin is invalid" });
     }
   });
 };
 
 exports.delete = async (req, res) => {
-  //comfirm password for delete admin acount
-  //input email
-  //input confirmPassword
-
-  await Admin.findOne({ email: req.body.email }, (err, admin) => {
+  /*await Admin.findOne({ email: req.body.email }, (err, admin) => {
     if (err) return res.json({ success: false, error: err });
     if (admin.comparePassword(req.body.confirmPassword)) {
-      Admin.findOneAndDelete({ email: req.body.email }, (err, admin) => {
-        if (err) return res.json({ success: false, error: err });
-        return res.json({ success: true, message: "Admin is deleted" });
-      });
     }
   });
+  */
+  await Admin.findOneAndDelete({ 
+    _id: req.params.id }, (err, admin) => {
+    if (err) return res.json({ success: false, error: err });
+    return res.json({ success: true, message: "Admin is deleted" });
+  });
 };
+
+exports.update = async (req, res) => {
+  await Admin.findOneAndUpdate({_id: req.params.id},req.body,{new:true},(err, admin) => {
+    if(err) return res.json({ success: false, error: err })
+    return res.json({ success:true, message:"Update successfully",newadmin:admin})
+  })
+}
