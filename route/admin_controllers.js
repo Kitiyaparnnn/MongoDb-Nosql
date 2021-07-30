@@ -46,11 +46,11 @@ exports.login = async (req, res) => {
           message: "Authentication failed. Invalid Admin or password.",
         });
       }
-      // console.log(admin.fullName);
+      console.log(admin.fullName);
       return res.json({
         message: "Login success",
         token: jwt.sign(
-          { _id: admin._id },
+          { email: admin.email, fullName: admin.fullName, _id: admin._id },
           process.env.SECRET_KEY
         ),
       });
@@ -79,10 +79,7 @@ exports.profile = async (req, res) => {
   //inputheader Authentication=token
   //show admin acount w/ password
   if (req.Admin) {
-    await Admin.findById(req.Admin,(err,admin) => {
-      if(err) return res.json({ success: false, error: err })
-      return res.json({admin})
-    })
+    return await res.send(req.Admin);
   } else {
     return res.status(401).json({ message: "Invalid token" });
   }
