@@ -7,7 +7,7 @@ const multer = require("multer");
 const { GridFsStorage } = require("multer-gridfs-storage");
 const Grid = require("gridfs-stream");
 const path = require("path");
-const {v4} = require("uuid");
+const { v4 } = require("uuid");
 //GridFS process
 let gfsFace, gfsIden, gfsStudent;
 mongoose.connection.once("open", () => {
@@ -180,20 +180,27 @@ router.post("/", multiUploads, (req, res) => {
   // ) {
   //   return res.send("image is duplicated");
   // }
-
-  const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${v4()}`;
-  const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${v4()}`;
+  const faceName = v4(),
+    idenName = v4(),
+    StuName = v4();
+  const faceFile = req.files.faceImage[0],
+    idenFile = req.files.identifierImage[0];
+  (faceFile.originalname = faceName), (idenFile.originalname = idenName);
+  const faceUrl = `${process.env.DEPLOY_URL}/customers/faceImage/${faceName}`;
+  const idenUrl = `${process.env.DEPLOY_URL}/customers/identifierImage/${idenName}`;
   console.log(faceUrl);
   console.log(idenUrl);
   const image = {
-    faceImage: { link: faceUrl, data: req.files.faceImage[0] },
-    identifierImage: { link: idenUrl, data: req.files.identifierImage[0] },
+    faceImage: { link: faceUrl, data: faceFile },
+    identifierImage: { link: idenUrl, data: idenFile },
   };
 
   if (req.files.studentImage) {
-    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${v4()}`;
+    const stuFile = req.files.studentImage[0];
+    stuFile.originalname = StuName;
+    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${StuName}`;
     console.log(studentUrl);
-    image.studentImage = { link: studentUrl, data: req.files.studentImage[0] };
+    image.studentImage = { link: studentUrl, data: stuFile };
   }
 
   const newuser = {
