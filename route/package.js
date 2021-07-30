@@ -155,7 +155,7 @@ router.get("/:id", async (req, res) => {
             package = await Package.find(
               {
                 package_type: packageType,
-                internet_type: internetType,
+                // internet_type: internetType,
                 price: { $gte: minFee, $lte: maxFee },
                 calltime: {
                   $gte: minFreeCall,
@@ -239,6 +239,7 @@ router.get("/:id", async (req, res) => {
       console.log("pre paid process");
       //กรณีกรอกข้อมูล ราคาแพ็คเกจ ปริมาณการใช้อินเทอร์เน็ต
       try {
+        console.log("case 1");
         if (
           req.query.minFee != "" &&
           req.query.maxFee != "" &&
@@ -248,6 +249,7 @@ router.get("/:id", async (req, res) => {
           package = await Package.find(
             {
               package_type: packageType,
+              internet_type : internetType,
               price: { $gte: minFee, $lte: maxFee },
               calltime: {
                 $gte: minDuration,
@@ -276,6 +278,7 @@ router.get("/:id", async (req, res) => {
         }
         //กรณีอื่นๆ
         else {
+          console.log("case 2");
           package = await Package.find(
             {
               package_type: packageType,
