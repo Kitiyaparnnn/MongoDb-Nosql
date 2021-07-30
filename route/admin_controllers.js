@@ -178,6 +178,8 @@ exports.delete = async (req, res) => {
 exports.update = async (req, res) => {
   await Admin.findOneAndUpdate({_id: req.params.id},req.body,{new:true},(err, admin) => {
     if(err) return res.json({ success: false, error: err })
+    admin.created = new Date();
+    admin.save()
     return res.json({ success:true, message:"Update successfully",newadmin:admin})
   })
 }

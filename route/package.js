@@ -25,7 +25,7 @@ router.get("/:id", async (req, res) => {
 
   let postpaid_minFee = parseInt(process.env.postpaid_minFee);
   let postpaid_maxFee = parseInt(process.env.postpaid_maxFee);
-  let postpaid_minFreeCall = +process.env.postpaid_minFreeCall;
+  let postpaid_minFreeCall = parseInt(process.env.postpaid_minFreeCall);
   let postpaid_maxFreeCall = parseInt(process.env.postpaid_maxFreeCall);
   let postpaid_minData = parseInt(process.env.postpaid_minData);
   let postpaid_maxData = parseInt(process.env.postpaid_maxData);
@@ -102,7 +102,7 @@ router.get("/:id", async (req, res) => {
     if (maxData == "") maxData = postpaid_maxData;
     if (isMNP == "") isMNP = process.env.isMNP;
     if (range == "") range = p_range;
-    // console.log(isMNP);
+    console.log(minFreeCall);
 
     if (packageType === "Post Paid") {
       if (internetType == "") internetType = process.env.postpaid_internetType;
@@ -137,20 +137,25 @@ router.get("/:id", async (req, res) => {
       } else {
         console.log("post paid process");
         let package;
+        const a =
+          (req.query.minFee &&
+            req.query.maxFee &&
+            req.query.minData &&
+            req.query.maxData) ||
+          (req.query.minFee &&
+            req.query.maxFee &&
+            req.query.minSpeed &&
+            req.query.maxSpeed);
+
+        console.log(a);
         try {
           //กรณีกรอกข้อมูล ราคาแพ็คเกจ ปริมาณการใช้อินเทอร์เน็ต ระยะเวลาโทร
-          if (
-            req.query.minFee != "" &&
-            req.query.maxFee != "" &&
-            req.query.minData != "" &&
-            req.query.maxData != "" &&
-            req.query.minFreeCall != "" &&
-            req.query.maxFreeCall != ""
-          ) {
+          if (a != "") {
+            console.log("case 1");
             package = await Package.find(
               {
                 package_type: packageType,
-                // internet_type: internetType,
+                internet_type: internetType,
                 price: { $gte: minFee, $lte: maxFee },
                 calltime: {
                   $gte: minFreeCall,
@@ -174,7 +179,9 @@ router.get("/:id", async (req, res) => {
               .sort({ price: 1, name: 1, internet_speed: 1, calltime: -1 })
               .limit(range);
           }
-          else{
+          //กนรณีอื่นๆ
+          else {
+            console.log("case 2");
             package = await Package.find(
               {
                 package_type: packageType,
@@ -198,7 +205,8 @@ router.get("/:id", async (req, res) => {
                 internet_speed: 1,
               }
             )
-              .sort({ price: 1, internet_speed: 1, calltime: -1 })
+              .sort({ price: 1, internet_speed: -1, calltime: -1 })
+              // .sort({ })
               .limit(range);
           }
         } catch (err) {

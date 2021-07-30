@@ -6,7 +6,7 @@ const PackageSchema = mongoose.Schema({
   nameEng: { type: String, default:""},
   internet_type: { type: String, required: true },
   price: { type: Number, required: true },
-  calltime: { type: Number, default: 0 }, //เฉพาะโทรนอกเครือข่าย
+  calltime: { type: Number,}, //เฉพาะโทรนอกเครือข่าย
   internet_speed: { type: Number, required: true }, //GB,1000 is unlimited //call data,
   isMNP:{ type:Boolean, default:false},
   detailThai: [
