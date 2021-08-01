@@ -155,7 +155,7 @@ router.get("/:id", async (req, res) => {
             package = await Package.find(
               {
                 package_type: packageType,
-                // internet_type: internetType,
+                internet_type: internetType,
                 price: { $gte: minFee, $lte: maxFee },
                 calltime: {
                   $gte: minFreeCall,
@@ -185,7 +185,7 @@ router.get("/:id", async (req, res) => {
             package = await Package.find(
               {
                 package_type: packageType,
-                // internet_type: internetType,
+                internet_type: internetType,
                 price: { $gte: minFee, $lte: maxFee },
                 calltime: {
                   $gte: minFreeCall,

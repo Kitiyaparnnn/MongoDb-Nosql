@@ -94,18 +94,21 @@ router.get("/filter", async (req, res) => {
     university,
     birthday,
     indentifier,
-    permanentAddress,
+    nationality,
+    currentAddress,
     deliveryAddress,
   } = req.query;
   console.log(req.query);
   try {
     let result;
+    //filter by name
     if (name) {
       result = await User.find({
         name: new RegExp("^" + `${name}` + "$", "i"),
       });
     }
-    if (
+    //filter by info + id
+    else if (
       phone ||
       email ||
       institution ||
@@ -113,11 +116,13 @@ router.get("/filter", async (req, res) => {
       university ||
       birthday ||
       indentifier ||
-      permanentAddress ||
-      deliveryAddress
+      currentAddress ||
+      deliveryAddress ||
+      nationality
     ) {
       result = await User.find(req.query);
-    } else {
+    }
+     else {
       return res.json({
         success: false,
         message: "Required fields are not supplied",
@@ -143,13 +148,14 @@ router.post("/", multiUploads, (req, res) => {
     lastName,
     birthday,
     identifier,
-    permanentAddress,
+    nationality,
+    currentAddress,
     deliveryAddress,
     phone,
     email,
     institution,
   } = req.body;
-  const permanent = JSON.parse(permanentAddress);
+  const current = JSON.parse(currentAddress);
   const delivery = JSON.parse(deliveryAddress);
   const phones = phone.replace(/ /g, "").split(",");
   const emails = email.replace(/ /g, "").split(",");
@@ -207,7 +213,8 @@ router.post("/", multiUploads, (req, res) => {
     name: firstName + " " + lastName,
     birthday,
     identifier,
-    permanentAddress: permanent,
+    nationality,
+    currentAddress: current,
     deliveryAddress: delivery,
     phone: phones,
     email: emails,

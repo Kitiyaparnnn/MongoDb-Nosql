@@ -2,26 +2,25 @@ const mongoose = require("mongoose");
 
 const PackageSchema = mongoose.Schema({
   package_type: { type: String, required: true, default: "Post Paid" },
-  nameThai:{ type: String, default:""},
-  nameEng: { type: String, default:""},
+  nameThai: { type: String, default: "" },
+  nameEng: { type: String, default: "" },
   internet_type: { type: String, required: true },
   price: { type: Number, required: true },
-  calltime: { type: Number,}, //เฉพาะโทรนอกเครือข่าย
+  calltime: { type: Number }, //เฉพาะโทรนอกเครือข่าย
   internet_speed: { type: Number, required: true }, //GB,1000 is unlimited //call data,
-  isMNP:{ type:Boolean, default:false},
+  isMNP: { type: Boolean, default: false },
   detailThai: [
     {
       type: String,
     },
   ],
   detailEng: [
-    { 
-      type: String 
-    }
+    {
+      type: String,
+    },
   ],
   date: { type: Date, default: Date.now },
 });
-
 
 //Post Paid
 //limit calltime 0-800 min

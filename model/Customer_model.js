@@ -4,7 +4,8 @@ const UserSchema = mongoose.Schema({
   name: { type: String, required: true },
   birthday: { type: String, required: true },
   identifier: { type: String, required: true },
-  permanentAddress: {
+  nationality: { type: String ,default:"Thailand"},
+  currentAddress: {
     detail: { type: String, required: true },
     subdistrict: { type: String, required: true },
     district: { type: String, required: true },

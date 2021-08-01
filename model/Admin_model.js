@@ -5,8 +5,10 @@ const mongoose = require("mongoose"),
 //header admin
 const AdminSchema = new Schema({
   appointment: { type: Number, default: 0 },
+  workingOn: [{ type:String , required: true,default:""}],
   fullName: {
     type: String,
+    unique: true,
     trim: true,
     required: true,
   },

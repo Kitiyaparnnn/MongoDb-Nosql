@@ -5,7 +5,7 @@ const Admin = require("../model/Admin_model");
 // const process.env.SECRET_KEY = 'RESTFULAPIs'
 
 exports.register = async (req, res) => {
-  //input fullname,emal,password
+  //input fullname,emal,password,workingOn
   if (req.body.password.length < 8)
     return res.json({
       success: false,
