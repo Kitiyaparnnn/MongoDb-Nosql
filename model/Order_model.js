@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
-//array shopping 
-//admin
+
 const OrdersSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   packages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Package" }],

@@ -39,6 +39,7 @@ router.get("/filter", async (req, res) => {
       console.log(req.query.status);
       Order.find(req.query, (err, orders) => {
         if (err) return res.json({ success: false });
+        if(orders.length==0) return res.json({ success: true,messages: "order is empty"});
         return res.json({ success: true, amount: orders.length, orders });
       });
     }
@@ -61,9 +62,22 @@ router.get("/filter", async (req, res) => {
         },
         (err, orders) => {
           if (err) return res.json({ success: false, err });
+          if(orders.length==0) return res.json({ success: true,messages: "order is empty"});
           return res.json({ success: true, amount: orders.length, orders });
         }
       );
+    }
+    //filter by deliveryAddress
+    if(req.query.province){
+      let matches = await User.find({"deliveryAddress.province" : req.query.province},{_id:1})
+      let users = [];
+      matches.forEach(user => users.push(user._id))
+
+      await Order.find({"user":{$in:users}},(err, orders) => {
+        if(err) return res.json({ success: false, error: err })
+        if(orders.length==0) return res.json({ success: true,messages: "order is empty"});
+        return res.json({ success: true, amount:orders.length, orders });
+      }).populate("user packages", "name");
     }
     //filter by order id
     if (req.query._id) {

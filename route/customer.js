@@ -96,7 +96,7 @@ router.get("/filter", async (req, res) => {
     indentifier,
     nationality,
     currentAddress,
-    deliveryAddress,
+    province
   } = req.query;
   console.log(req.query);
   try {
@@ -117,10 +117,14 @@ router.get("/filter", async (req, res) => {
       birthday ||
       indentifier ||
       currentAddress ||
-      deliveryAddress ||
       nationality
     ) {
       result = await User.find(req.query);
+    }
+    else if(province){
+      console.log(province,typeof(province));
+      result = await User.find({"deliveryAddress.province" : province});
+      // result = await User.find({"deliveryAddress.province" : "chiangmai"})
     }
      else {
       return res.json({
