@@ -8,6 +8,11 @@ const { GridFsStorage } = require("multer-gridfs-storage");
 const Grid = require("gridfs-stream");
 const path = require("path");
 const { v4 } = require("uuid");
+
+const faceName = v4(),
+  idenName = v4(),
+  stuName = v4();
+
 //GridFS process
 let gfsFace, gfsIden, gfsStudent;
 mongoose.connection.once("open", () => {
@@ -23,13 +28,21 @@ const storage = new GridFsStorage({
   url: process.env.MOGODB_URI,
   options: { useNewUrlParser: true, useUnifiedTopology: true },
   file: (req, file) => {
-    const filename = file.originalname;
     let bName;
-    if (file.fieldname === "faceImage") bName = "FaceImage";
-    if (file.fieldname === "identifierImage") bName = "IdenImage";
-    if (file.fieldname === "studentImage") bName = "StudentImage";
+    if (file.fieldname === "faceImage") {
+      bName = "FaceImage";
+      file.filename = faceName;
+    }
+    if (file.fieldname === "identifierImage") {
+      bName = "IdenImage";
+      file.filename = idenName;
+    }
+    if (file.fieldname === "studentImage") {
+      bName = "StudentImage";
+      file.filename = stuName;
+    }
     return {
-      filename: filename,
+      filename: file.filename,
       bucketName: bName,
     };
   },
@@ -96,7 +109,7 @@ router.get("/filter", async (req, res) => {
     indentifier,
     nationality,
     currentAddress,
-    province
+    province,
   } = req.query;
   console.log(req.query);
   try {
@@ -120,13 +133,11 @@ router.get("/filter", async (req, res) => {
       nationality
     ) {
       result = await User.find(req.query);
-    }
-    else if(province){
-      console.log(province,typeof(province));
-      result = await User.find({"deliveryAddress.province" : province});
+    } else if (province) {
+      console.log(province, typeof province);
+      result = await User.find({ "deliveryAddress.province": province });
       // result = await User.find({"deliveryAddress.province" : "chiangmai"})
-    }
-     else {
+    } else {
       return res.json({
         success: false,
         message: "Required fields are not supplied",
@@ -190,9 +201,10 @@ router.post("/", multiUploads, (req, res) => {
   // ) {
   //   return res.send("image is duplicated");
   // }
-  const faceName = v4(),
-    idenName = v4(),
-    StuName = v4();
+
+  // const faceName = v4(),
+  //   idenName = v4(),
+  //   StuName = v4();
   const faceFile = req.files.faceImage[0],
     idenFile = req.files.identifierImage[0];
   (faceFile.originalname = faceName), (idenFile.originalname = idenName);
@@ -207,8 +219,8 @@ router.post("/", multiUploads, (req, res) => {
 
   if (req.files.studentImage) {
     const stuFile = req.files.studentImage[0];
-    stuFile.originalname = StuName;
-    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${StuName}`;
+    stuFile.originalname = stuName;
+    const studentUrl = `${process.env.DEPLOY_URL}/customers/studentImage/${stuName}`;
     console.log(studentUrl);
     image.studentImage = { link: studentUrl, data: stuFile };
   }
