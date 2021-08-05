@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
       message: "there is " + orders.length + " orders",
       orders,
     });
-  }).populate("user packages", "name");
+  }).populate("user packages admin", "name");
 });
 
 router.get("/filter", async (req, res) => {
@@ -39,9 +39,10 @@ router.get("/filter", async (req, res) => {
       console.log(req.query.status);
       Order.find(req.query, (err, orders) => {
         if (err) return res.json({ success: false });
-        if(orders.length==0) return res.json({ success: true,messages: "order is empty"});
+        if (orders.length == 0)
+          return res.json({ success: true, messages: "order is empty" });
         return res.json({ success: true, amount: orders.length, orders });
-      });
+      }).populate("user packages admin");
     }
     //filter by date
     if (req.query.calender) {
@@ -62,57 +63,40 @@ router.get("/filter", async (req, res) => {
         },
         (err, orders) => {
           if (err) return res.json({ success: false, err });
-          if(orders.length==0) return res.json({ success: true,messages: "order is empty"});
+          if (orders.length == 0)
+            return res.json({ success: true, messages: "order is empty" });
           return res.json({ success: true, amount: orders.length, orders });
         }
-      );
+      ).populate("user packages admin");
     }
-    //filter by deliveryAddress
-    if(req.query.province){
-      let matches = await User.find({"deliveryAddress.province" : req.query.province},{_id:1})
+    //filter by province of deliveryAddress
+    if (req.query.province) {
+      let matches = await User.find(
+        { "deliveryAddress.province": req.query.province },
+        { _id: 1 }
+      );
       let users = [];
-      matches.forEach(user => users.push(user._id))
+      matches.forEach((user) => users.push(user._id));
 
-      await Order.find({"user":{$in:users}},(err, orders) => {
-        if(err) return res.json({ success: false, error: err })
-        if(orders.length==0) return res.json({ success: true,messages: "order is empty"});
-        return res.json({ success: true, amount:orders.length, orders });
-      }).populate("user packages", "name");
+      await Order.find({ user: { $in: users } }, (err, orders) => {
+        if (err) return res.json({ success: false, error: err });
+        if (orders.length == 0)
+          return res.json({ success: true, messages: "order is empty" });
+        return res.json({ success: true, amount: orders.length, orders });
+      }).populate("user packages admin");
     }
     //filter by order id
     if (req.query._id) {
-      Order.find({ _id: req.query._id }, async (err, find) => {
+      // console.log(req.query._id);
+      await Order.find({ _id: req.query._id }, async (err, order) => {
         if (err) return res.json({ success: false, error: err });
-        console.log(find);
-        // console.log(find.user, find.packages);
-        try {
-          const userData = await User.findById(
-            { _id: find.user },
-            { _id: 1, name: 1, phoneNumber: 1, deliveryAddress: 1 }
-          );
-          const packagesData = await Package.findById(
-            { _id: find.packages[0] },
-            { _id: 1, name: 1 }
-          );
-          const adminData = await Admin.findById(
-            { _id: find.admin },
-            { _id: 1, fullname: 1 }
-          );
-          if (userData == [] || packagesData == undefined)
-            return res.json({
-              success: false,
-              message: "user not found or packages not found",
-            });
-          return res.json({
-            success: true,
-            user: userData,
-            packages: packagesData,
-            admin: adminData,
-          });
-        } catch (err) {
-          res.json({ success: false ,messages:"This order is empty"});
-        }
-      });
+        console.log(order);
+        return res.json({
+          success: true,
+          messages: "This is order "+`${req.query._id}`,
+          order,
+        });
+      }).populate("user packages admin");
     }
   } catch {
     return res.status(500).json({
