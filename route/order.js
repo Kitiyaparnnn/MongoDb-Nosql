@@ -98,6 +98,23 @@ router.get("/filter", async (req, res) => {
         });
       }).populate("user packages admin");
     }
+
+    //filter by package id
+    if(req.query.packageId){
+      let matches = await Package.find(
+        { _id: req.query.packageId },
+        { _id: 1 }
+      );
+      let packages = [];
+      matches.forEach((package) => packages.push(package._id));
+
+      await Order.find({ packages: { $in: packages } }, (err, orders) => {
+        if (err) return res.json({ success: false, error: err });
+        if (orders.length == 0)
+          return res.json({ success: true, messages: "order is empty" });
+        return res.json({ success: true, amount: orders.length, orders });
+      }).populate("user packages admin");
+    }
   } catch {
     return res.status(500).json({
       success: false,
