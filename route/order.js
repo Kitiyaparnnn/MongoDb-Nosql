@@ -93,14 +93,14 @@ router.get("/filter", async (req, res) => {
         console.log(order);
         return res.json({
           success: true,
-          messages: "This is order "+`${req.query._id}`,
+          messages: "This is order " + `${req.query._id}`,
           order,
         });
       }).populate("user packages admin");
     }
 
     //filter by package id
-    if(req.query.packageId){
+    if (req.query.packageId) {
       let matches = await Package.find(
         { _id: req.query.packageId },
         { _id: 1 }
@@ -191,7 +191,11 @@ router.put("/:id", async (req, res) => {
   try {
     const result = await Order.findOneAndUpdate(
       { _id: req.params.id },
-      req.body,
+      {
+        status: req.body.status,
+        admin: req.body.admin,
+        proceedDate: Date.now(),
+      },
       {
         new: true,
         runValidators: true,

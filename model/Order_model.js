@@ -6,7 +6,8 @@ const OrdersSchema = mongoose.Schema({
   packages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Package" }],
   date : {type: Date , default: Date.now},
   status : {type:String , default:'pending order'},
-  admin:{ type: mongoose.Schema.Types.ObjectId, ref: "Admin",default:null}
+  admin:{ type: mongoose.Schema.Types.ObjectId, ref: "Admin",default:null},
+  proceedDate: { type:Date ,default: Date.now}
 },{collection: 'orders'});
 
 module.exports = mongoose.model("Order", OrdersSchema);
